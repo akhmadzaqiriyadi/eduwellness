@@ -22,6 +22,9 @@ export interface LiveSensorState {
   suhuAmbient: number;
   bpm: number;
   updatedAt: string;
+  deviceId?: string;
+  wifiSsid?: string;
+  isWifiConnected?: boolean;
 }
 
 // In-Memory Live State Fallback for real-time IoT polling
@@ -30,11 +33,23 @@ export let globalLiveState: LiveSensorState = {
   suhuAmbient: 29.8,
   bpm: 72,
   updatedAt: new Date().toISOString(),
+  deviceId: 'WEMOS-D1-UTY',
+  wifiSsid: 'UTY-Network',
+  isWifiConnected: true,
 };
 
-export function updateGlobalLiveState(data: { suhuObjek: number; suhuAmbient: number; bpm: number }) {
+export function updateGlobalLiveState(data: {
+  suhuObjek: number;
+  suhuAmbient: number;
+  bpm: number;
+  deviceId?: string;
+  wifiSsid?: string;
+}) {
   globalLiveState = {
     ...data,
     updatedAt: new Date().toISOString(),
+    deviceId: data.deviceId || 'WEMOS-D1-UTY',
+    wifiSsid: data.wifiSsid || 'UTY-Network',
+    isWifiConnected: true,
   };
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Activity, Heart, ShieldCheck, Save, Clock, RefreshCw, Zap, AlertCircle, CheckCircle2, TrendingUp, UserCheck, Lock, Timer, Sparkles } from 'lucide-react';
+import { Activity, Heart, Save, Clock, Zap, UserCheck, Lock, Timer, Wifi, WifiOff, Cpu, Signal } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 interface ChartPoint {
@@ -18,6 +18,12 @@ export default function DashboardPage() {
   const [lastUpdated, setLastUpdated] = useState<string>('');
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
+  // Wi-Fi & Device Info
+  const [isWifiConnected, setIsWifiConnected] = useState<boolean>(true);
+  const [deviceId, setDeviceId] = useState<string>('WEMOS-D1-UTY');
+  const [wifiSsid, setWifiSsid] = useState<string>('UTY-Network');
+  const [secondsAgo, setSecondsAgo] = useState<number>(0);
+
   const [chartData, setChartData] = useState<ChartPoint[]>([
     { time: '12:00', suhu: 36.4, bpm: 70 },
     { time: '12:02', suhu: 36.5, bpm: 72 },
@@ -27,7 +33,6 @@ export default function DashboardPage() {
 
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
-  const [isLiveConnected, setIsLiveConnected] = useState(true);
 
   // AUTO-SAVE TIMER STATES
   const [countdown, setCountdown] = useState<number | null>(null);
@@ -59,7 +64,12 @@ export default function DashboardPage() {
             setSuhuAmbient(data.suhuAmbient || 30.0);
             setBpm(data.bpm || 0);
             setLastUpdated(new Date().toLocaleTimeString());
-            setIsLiveConnected(true);
+            
+            // Device Wi-Fi status
+            setIsWifiConnected(data.isWifiConnected ?? true);
+            setDeviceId(data.deviceId || 'WEMOS-D1-UTY');
+            setWifiSsid(data.wifiSsid || 'UTY-Network');
+            setSecondsAgo(data.secondsAgo || 0);
 
             const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             setChartData((prev) => {
@@ -69,7 +79,7 @@ export default function DashboardPage() {
           }
         }
       } catch (err) {
-        setIsLiveConnected(false);
+        setIsWifiConnected(false);
       }
     }, 800);
 
@@ -186,7 +196,7 @@ export default function DashboardPage() {
   const bpmStatus = getBpmStatus();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       
       {/* HEADER & USER BANNER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 glass-card p-8 rounded-3xl bg-white border-sky-100 shadow-xl shadow-sky-500/5">
@@ -206,15 +216,50 @@ export default function DashboardPage() {
           </div>
 
           <div className={`flex items-center gap-2 px-4 py-2.5 rounded-full border text-xs font-extrabold ${
-            isLiveConnected ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-50 border-rose-200 text-rose-700'
+            isWifiConnected ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-50 border-rose-200 text-rose-700'
           }`}>
-            <span className={`w-2.5 h-2.5 rounded-full ${isLiveConnected ? 'bg-emerald-500 animate-ping' : 'bg-rose-500'}`}></span>
-            {isLiveConnected ? 'Sensor Connected' : 'Sensor Disconnected'}
+            <span className={`w-2.5 h-2.5 rounded-full ${isWifiConnected ? 'bg-emerald-500 animate-ping' : 'bg-rose-500'}`}></span>
+            {isWifiConnected ? 'Sensor Online ✅' : 'Sensor Offline ❌'}
           </div>
         </div>
       </div>
 
-      {/* AUTO-SAVE COUNTDOWN NOTIFICATION BANNER (RICH SKY BLUE SOLID CARD) */}
+      {/* IOT DEVICE & WIFI CONNECTION STATUS BADGE CARD */}
+      <div className="glass-card p-6 rounded-3xl bg-white border-sky-100 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${
+            isWifiConnected ? 'bg-emerald-50 border-emerald-200 text-emerald-600' : 'bg-rose-50 border-rose-200 text-rose-600'
+          }`}>
+            {isWifiConnected ? <Wifi className="w-6 h-6 animate-pulse" /> : <WifiOff className="w-6 h-6" />}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className={`text-sm font-extrabold ${isWifiConnected ? 'text-emerald-700' : 'text-rose-700'}`}>
+                {isWifiConnected ? '🟢 Perangkat IoT Terhubung ke Wi-Fi' : '🔴 Perangkat IoT Terputus dari Wi-Fi'}
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-800 font-black text-[11px] border border-sky-200">
+                {deviceId}
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              SSID Wi-Fi: <strong className="text-slate-800 font-bold">{wifiSsid}</strong> • Diterima {secondsAgo}s yang lalu
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 font-bold">
+            <Cpu className="w-4 h-4 text-sky-500" />
+            <span>Wemos D1 mini</span>
+          </div>
+          <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 font-bold">
+            <Signal className="w-4 h-4 text-emerald-500" />
+            <span>Signal Strong</span>
+          </div>
+        </div>
+      </div>
+
+      {/* AUTO-SAVE COUNTDOWN NOTIFICATION BANNER */}
       {bpm > 0 && userEmail && countdown !== null && countdown > 0 && (
         <div className="p-6 rounded-3xl bg-gradient-to-r from-sky-600 via-sky-500 to-blue-600 text-white shadow-xl shadow-sky-500/30 space-y-4 border border-sky-400/40 animate-fadeIn">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

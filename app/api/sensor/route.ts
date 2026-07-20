@@ -3,34 +3,39 @@ import { globalLiveState, updateGlobalLiveState } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
+// GET: Live Dashboard reads latest sensor data + Wi-Fi status
 export async function GET() {
-  return NextResponse.json(globalLiveState, {
-    headers: {
-      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-    },
+  const lastUpdatedTime = new Date(globalLiveState.updatedAt).getTime();
+  const secondsAgo = Math.floor((Date.now() - lastUpdatedTime) / 1000);
+  
+  // Device is connected if data received within 5 seconds
+  const isWifiConnected = secondsAgo < 5;
+
+  return NextResponse.json({
+    ...globalLiveState,
+    isWifiConnected,
+    secondsAgo,
   });
 }
 
+// POST: Wemos D1 Wi-Fi sends JSON sensor data
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { suhuObjek, suhuAmbient, bpm } = body;
+    
+    if (typeof body.suhuObjek === 'number') {
+      updateGlobalLiveState({
+        suhuObjek: body.suhuObjek,
+        suhuAmbient: body.suhuAmbient || 30.0,
+        bpm: body.bpm || 0,
+        deviceId: body.deviceId || 'WEMOS-D1-UTY',
+        wifiSsid: body.wifiSsid || 'UTY-Network',
+      });
+      return NextResponse.json({ success: true, message: 'Data sensor diperbarui' });
+    }
 
-    updateGlobalLiveState({
-      suhuObjek: parseFloat(suhuObjek),
-      suhuAmbient: parseFloat(suhuAmbient || 30.0),
-      bpm: parseInt(bpm || 0),
-    });
-
-    return NextResponse.json({
-      success: true,
-      message: 'Data sensor berhasil diperbarui',
-      data: globalLiveState,
-    });
-  } catch (error: any) {
-    return NextResponse.json(
-      { success: false, message: 'Invalid payload', error: error.message },
-      { status: 400 }
-    );
+    return NextResponse.json({ success: false, message: 'Format data tidak valid' }, { status: 400 });
+  } catch (error) {
+    return NextResponse.json({ success: false, message: 'Error parsing JSON' }, { status: 400 });
   }
 }
