@@ -129,6 +129,15 @@ export default function DashboardPage() {
     return () => clearTimeout(timerId);
   }, [countdown]);
 
+  const saveToLocalBackup = (email: string, record: any) => {
+    try {
+      const key = `eduwellness_local_history_${email}`;
+      const existing = JSON.parse(localStorage.getItem(key) || '[]');
+      const updated = [record, ...existing.filter((item: any) => item.id !== record.id)];
+      localStorage.setItem(key, JSON.stringify(updated));
+    } catch (e) {}
+  };
+
   const executeAutoSave = async () => {
     const email = userEmailRef.current;
     if (!email) return;
@@ -151,6 +160,7 @@ export default function DashboardPage() {
 
       const result = await res.json();
       if (result.success) {
+        if (result.data) saveToLocalBackup(email, result.data);
         setSaveMessage('🎉 OTOMATIS TERSIMPAN! Hasil pengecekan kesehatan telah masuk ke Riwayat.');
       } else {
         setSaveMessage('⚠️ Gagal menyimpan otomatis: ' + result.message);
@@ -183,6 +193,7 @@ export default function DashboardPage() {
 
       const result = await res.json();
       if (result.success) {
+        if (result.data) saveToLocalBackup(userEmail, result.data);
         setSaveMessage('✅ Hasil tes berhasil disimpan ke riwayat!');
       } else {
         setSaveMessage('⚠️ Gagal menyimpan tes: ' + result.message);

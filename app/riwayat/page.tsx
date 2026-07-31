@@ -12,17 +12,46 @@ export default function RiwayatPage() {
 
   const fetchHistory = async (email: string) => {
     setLoading(true);
+    
+    // Load client-side local backup first
+    let localBackup: HealthCheckRecord[] = [];
+    try {
+      const stored = localStorage.getItem(`eduwellness_local_history_${email}`);
+      if (stored) {
+        localBackup = JSON.parse(stored);
+      }
+    } catch (err) {}
+
     try {
       const res = await fetch(`/api/health-checks?email=${encodeURIComponent(email)}`, { cache: 'no-store' });
       if (res.ok) {
         const result = await res.json();
         if (result.success && Array.isArray(result.data)) {
-          setHistory(result.data);
+          // Merge API data and local backup, deduplicating by ID or created_at
+          const map = new Map<string, HealthCheckRecord>();
+          for (const item of [...localBackup, ...result.data]) {
+            const key = item.id || `${item.user_email}_${item.created_at}`;
+            if (!map.has(key)) map.set(key, item);
+          }
+          const merged = Array.from(map.values()).sort((a, b) => {
+            const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+            const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+            return timeB - timeA;
+          });
+
+          setHistory(merged);
+          try {
+            localStorage.setItem(`eduwellness_local_history_${email}`, JSON.stringify(merged));
+          } catch (e) {}
+          return;
         }
       }
     } catch (e) {
       console.error('Error fetching history:', e);
     } finally {
+      if (localBackup.length > 0) {
+        setHistory(localBackup);
+      }
       setLoading(false);
     }
   };

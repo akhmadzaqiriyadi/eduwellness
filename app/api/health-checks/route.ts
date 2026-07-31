@@ -14,25 +14,41 @@ export async function GET(request: Request) {
     return NextResponse.json({ success: true, data: [] });
   }
 
-  try {
-    if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://your-supabase-project.supabase.co') {
-      const { data, error } = await supabase
-        .from('health_checks')
-        .select('*')
-        .eq('user_email', email)
-        .order('created_at', { ascending: false });
+  let supabaseRecords: HealthCheckRecord[] = [];
 
-      if (!error && data && data.length > 0) {
-        return NextResponse.json({ success: true, data });
-      }
+  try {
+    const { data, error } = await supabase
+      .from('health_checks')
+      .select('*')
+      .eq('user_email', email)
+      .order('created_at', { ascending: false });
+
+    if (!error && Array.isArray(data)) {
+      supabaseRecords = data;
     }
   } catch (err) {
     console.warn('Supabase fetch error:', err);
   }
 
   // Filter in-memory records strictly by logged in user email
-  const filtered = inMemoryHistory.filter(h => h.user_email === email);
-  return NextResponse.json({ success: true, data: filtered });
+  const memRecords = inMemoryHistory.filter(h => h.user_email === email);
+
+  // Merge Supabase records and memory records, deduplicating by ID/created_at
+  const recordMap = new Map<string, HealthCheckRecord>();
+  for (const item of [...memRecords, ...supabaseRecords]) {
+    const key = item.id || `${item.user_email}_${item.created_at}`;
+    if (!recordMap.has(key)) {
+      recordMap.set(key, item);
+    }
+  }
+
+  const combined = Array.from(recordMap.values()).sort((a, b) => {
+    const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return timeB - timeA;
+  });
+
+  return NextResponse.json({ success: true, data: combined });
 }
 
 export async function POST(request: Request) {
@@ -62,27 +78,25 @@ export async function POST(request: Request) {
       created_at: new Date().toISOString(),
     };
 
-    // Save to memory
+    // Save to memory array fallback
     inMemoryHistory.unshift(newRecord);
 
-    // Also attempt Supabase insert if table exists
+    // Attempt Supabase insert
     try {
-      if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://your-supabase-project.supabase.co') {
-        const { data, error } = await supabase.from('health_checks').insert([{
-          user_email: newRecord.user_email,
-          suhu_objek: newRecord.suhu_objek,
-          suhu_ambient: newRecord.suhu_ambient,
-          bpm: newRecord.bpm,
-          status_kesehatan: newRecord.status_kesehatan,
-        }]).select();
+      const { data, error } = await supabase.from('health_checks').insert([{
+        user_email: newRecord.user_email,
+        suhu_objek: newRecord.suhu_objek,
+        suhu_ambient: newRecord.suhu_ambient,
+        bpm: newRecord.bpm,
+        status_kesehatan: newRecord.status_kesehatan,
+      }]).select();
 
-        if (!error && data && data.length > 0) {
-          return NextResponse.json({
-            success: true,
-            message: 'Berhasil menyimpan tes kesehatan ke Supabase',
-            data: data[0],
-          });
-        }
+      if (!error && data && data.length > 0) {
+        return NextResponse.json({
+          success: true,
+          message: 'Berhasil menyimpan tes kesehatan ke Supabase',
+          data: data[0],
+        });
       }
     } catch (err) {
       console.warn('Supabase insert exception:', err);
