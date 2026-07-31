@@ -61,3 +61,12 @@
 .animate-float {
   animation: float 4s ease-in-out infinite;
 }
+
+@keyframes bounceSlow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-16px); }
+}
+
+.animate-bounce-slow {
+  animation: bounceSlow 2.5s ease-in-out infinite;
+}

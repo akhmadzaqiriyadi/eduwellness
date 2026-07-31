@@ -45,11 +45,11 @@ export default function HomePage() {
 
           {/* RIGHT 3D HERO ILLUSTRATION */}
           <div className="lg:col-span-5 relative flex justify-center">
-            <div className="w-full max-w-md h-[420px] rounded-3xl overflow-hidden glass-card p-3 shadow-2xl shadow-sky-500/15 border-white relative group">
+            <div className="w-full max-w-md h-[420px] rounded-3xl overflow-hidden glass-card p-3 shadow-2xl shadow-sky-500/20 border-white relative group animate-bounce-slow">
               <div className="relative w-full h-full rounded-2xl overflow-hidden bg-gradient-to-tr from-sky-100 to-sky-50">
                 <Image
-                  src="/hero_student.png"
-                  alt="Siswa EduWellness Smartwatch IoT"
+                  src="/hero.jpeg"
+                  alt="EduWellness Smart Health IoT Hero"
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
                   priority
@@ -168,8 +168,8 @@ export default function HomePage() {
 
           <div className="lg:col-span-6 relative h-72 sm:h-80 rounded-2xl overflow-hidden border border-sky-100 shadow-md">
             <Image
-              src="/education_students.png"
-              alt="Siswa Belajar Edukasi Kesehatan IoT"
+              src="/literasi.jpeg"
+              alt="Literasi Digital Kesehatan Siswa"
               fill
               className="object-cover"
             />
