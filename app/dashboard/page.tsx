@@ -50,6 +50,9 @@ export default function DashboardPage() {
   bpmRef.current = bpm;
   userEmailRef.current = userEmail;
 
+  // Ref for debouncing offline connection status (prevents false lost connect flickers)
+  const offlineCounterRef = useRef<number>(0);
+
   // 1. Poll IoT API /api/sensor every 800ms
   useEffect(() => {
     const email = localStorage.getItem('eduwellness_user_email');
@@ -66,8 +69,17 @@ export default function DashboardPage() {
             setBpm(data.bpm || 0);
             setLastUpdated(new Date().toLocaleTimeString());
             
-            // Device Wi-Fi status
-            setIsWifiConnected(data.isWifiConnected ?? false);
+            // Device Wi-Fi status with 3-poll hysteresis (~2.4s) to prevent brief disconnect flickers
+            if (data.isWifiConnected) {
+              offlineCounterRef.current = 0;
+              setIsWifiConnected(true);
+            } else {
+              offlineCounterRef.current += 1;
+              if (offlineCounterRef.current >= 3) {
+                setIsWifiConnected(false);
+              }
+            }
+
             setDeviceId(data.deviceId || 'WEMOS-D1-UTY');
             setWifiSsid(data.wifiSsid || 'UTY-Network');
             setSecondsAgo(data.secondsAgo || 0);
@@ -80,7 +92,10 @@ export default function DashboardPage() {
           }
         }
       } catch (err) {
-        setIsWifiConnected(false);
+        offlineCounterRef.current += 1;
+        if (offlineCounterRef.current >= 3) {
+          setIsWifiConnected(false);
+        }
       }
     }, 800);
 

@@ -8,8 +8,8 @@ export async function GET() {
   const lastUpdatedTime = new Date(globalLiveState.updatedAt).getTime();
   const secondsAgo = Math.floor((Date.now() - lastUpdatedTime) / 1000);
   
-  // Device is connected if data received within 5 seconds
-  const isWifiConnected = secondsAgo < 5;
+  // Device is connected if data received within 10 seconds (gives buffer for HTTPS/SSL latency & Vercel cold starts)
+  const isWifiConnected = secondsAgo < 10;
 
   return NextResponse.json({
     ...globalLiveState,
