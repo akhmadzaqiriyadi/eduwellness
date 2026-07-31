@@ -28,10 +28,10 @@ export default function EdukasiPage() {
       <div className="text-center space-y-4 max-w-3xl mx-auto">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-100 text-sky-700 text-xs font-extrabold border border-sky-200">
           <BookOpen className="w-4 h-4 text-sky-500" />
-          <span>📚 Health Education Hub Gen Z</span>
+          <span>Health Education Hub Gen Z</span>
         </div>
         <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 leading-tight">
-          Edukasi Kesehatan <span className="text-gradient">Interaktif 💙</span>
+          Edukasi Kesehatan <span className="text-gradient">Interaktif ✨</span>
         </h1>
         <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
           Pelajari bahaya rokok, kesehatan reproduksi & menstruasi, pola makan sehat, pola tidur, dan 10 kebiasaan PHBS dalam satu tempat!
@@ -48,7 +48,7 @@ export default function EdukasiPage() {
               : 'text-slate-600 hover:text-sky-600 hover:bg-sky-50'
           }`}
         >
-          <Flame className="w-4 h-4" /> 🚭 Bahaya Rokok
+          <Flame className="w-4 h-4" /> Bahaya Rokok
         </button>
 
         <button
@@ -59,7 +59,7 @@ export default function EdukasiPage() {
               : 'text-slate-600 hover:text-sky-600 hover:bg-sky-50'
           }`}
         >
-          <HeartHandshake className="w-4 h-4" /> 🌸 Menstruasi
+          <HeartHandshake className="w-4 h-4" /> Menstruasi
         </button>
 
         <button
@@ -70,7 +70,7 @@ export default function EdukasiPage() {
               : 'text-slate-600 hover:text-sky-600 hover:bg-sky-50'
           }`}
         >
-          <Utensils className="w-4 h-4" /> 🍎 Pola Makan
+          <Utensils className="w-4 h-4" /> Pola Makan
         </button>
 
         <button
@@ -81,7 +81,7 @@ export default function EdukasiPage() {
               : 'text-slate-600 hover:text-sky-600 hover:bg-sky-50'
           }`}
         >
-          <Moon className="w-4 h-4" /> 😴 Pola Tidur
+          <Moon className="w-4 h-4" /> Pola Tidur
         </button>
 
         <button
@@ -92,7 +92,7 @@ export default function EdukasiPage() {
               : 'text-slate-600 hover:text-sky-600 hover:bg-sky-50'
           }`}
         >
-          <ShieldCheck className="w-4 h-4" /> 🧼 10 Kebiasaan PHBS
+          <ShieldCheck className="w-4 h-4" /> 10 Kebiasaan PHBS
         </button>
       </div>
 
