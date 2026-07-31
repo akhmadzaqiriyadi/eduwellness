@@ -48,7 +48,7 @@ export default function HomePage() {
             <div className="w-full max-w-md h-[420px] rounded-3xl overflow-hidden glass-card p-3 shadow-2xl shadow-sky-500/20 border-white relative group animate-bounce-slow">
               <div className="relative w-full h-full rounded-2xl overflow-hidden bg-gradient-to-tr from-sky-100 to-sky-50">
                 <Image
-                  src="/hero.jpeg"
+                  src="/literasi.jpeg"
                   alt="EduWellness Smart Health IoT Hero"
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -168,7 +168,7 @@ export default function HomePage() {
 
           <div className="lg:col-span-6 relative h-72 sm:h-80 rounded-2xl overflow-hidden border border-sky-100 shadow-md">
             <Image
-              src="/literasi.jpeg"
+              src="/hero.jpeg"
               alt="Literasi Digital Kesehatan Siswa"
               fill
               className="object-cover"
