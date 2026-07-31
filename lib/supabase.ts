@@ -31,11 +31,11 @@ export interface LiveSensorState {
 export let globalLiveState: LiveSensorState = {
   suhuObjek: 36.5,
   suhuAmbient: 29.8,
-  bpm: 72,
-  updatedAt: new Date().toISOString(),
+  bpm: 0,
+  updatedAt: new Date(0).toISOString(),
   deviceId: 'WEMOS-D1-UTY',
   wifiSsid: 'UTY-Network',
-  isWifiConnected: true,
+  isWifiConnected: false,
 };
 
 export function updateGlobalLiveState(data: {

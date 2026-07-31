@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Activity, Heart, Save, Clock, Zap, UserCheck, Lock, Timer, Wifi, WifiOff, Cpu, Signal } from 'lucide-react';
+import { Activity, Heart, Save, Clock, Zap, UserCheck, Lock, Timer, Wifi, WifiOff, Cpu, Signal, TrendingUp } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 interface ChartPoint {
@@ -14,12 +14,12 @@ interface ChartPoint {
 export default function DashboardPage() {
   const [suhuObjek, setSuhuObjek] = useState<number>(36.5);
   const [suhuAmbient, setSuhuAmbient] = useState<number>(30.0);
-  const [bpm, setBpm] = useState<number>(72);
+  const [bpm, setBpm] = useState<number>(0);
   const [lastUpdated, setLastUpdated] = useState<string>('');
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   // Wi-Fi & Device Info
-  const [isWifiConnected, setIsWifiConnected] = useState<boolean>(true);
+  const [isWifiConnected, setIsWifiConnected] = useState<boolean>(false);
   const [deviceId, setDeviceId] = useState<string>('WEMOS-D1-UTY');
   const [wifiSsid, setWifiSsid] = useState<string>('UTY-Network');
   const [secondsAgo, setSecondsAgo] = useState<number>(0);
@@ -37,6 +37,7 @@ export default function DashboardPage() {
   // AUTO-SAVE TIMER STATES
   const [countdown, setCountdown] = useState<number | null>(null);
   const [hasAutoSaved, setHasAutoSaved] = useState(false);
+  const zeroBpmTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Refs for current sensor values inside setInterval callback
   const suhuObjekRef = useRef(suhuObjek);
@@ -59,14 +60,14 @@ export default function DashboardPage() {
         const res = await fetch('/api/sensor', { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
-          if (data && data.suhuObjek) {
+          if (data && data.suhuObjek !== undefined) {
             setSuhuObjek(data.suhuObjek);
             setSuhuAmbient(data.suhuAmbient || 30.0);
             setBpm(data.bpm || 0);
             setLastUpdated(new Date().toLocaleTimeString());
             
             // Device Wi-Fi status
-            setIsWifiConnected(data.isWifiConnected ?? true);
+            setIsWifiConnected(data.isWifiConnected ?? false);
             setDeviceId(data.deviceId || 'WEMOS-D1-UTY');
             setWifiSsid(data.wifiSsid || 'UTY-Network');
             setSecondsAgo(data.secondsAgo || 0);
@@ -88,15 +89,29 @@ export default function DashboardPage() {
 
   // 2. AUTO-SAVE COUNTDOWN LOGIC
   useEffect(() => {
-    if (bpm > 0 && userEmail && !hasAutoSaved) {
+    // Only auto-save if device is online, finger is attached (bpm > 0), user is logged in, and hasn't saved yet
+    if (isWifiConnected && bpm > 0 && userEmail && !hasAutoSaved) {
+      if (zeroBpmTimerRef.current) {
+        clearTimeout(zeroBpmTimerRef.current);
+        zeroBpmTimerRef.current = null;
+      }
       if (countdown === null) {
         setCountdown(10);
       }
-    } else if (bpm === 0) {
+    } else if (bpm === 0 || !isWifiConnected) {
       setCountdown(null);
-      setHasAutoSaved(false);
+      
+      // Debounce resetting hasAutoSaved (wait 2.5s of no finger / disconnected)
+      if (hasAutoSaved && !zeroBpmTimerRef.current) {
+        zeroBpmTimerRef.current = setTimeout(() => {
+          setHasAutoSaved(false);
+          zeroBpmTimerRef.current = null;
+        }, 2500);
+      } else if (!hasAutoSaved) {
+        setHasAutoSaved(false);
+      }
     }
-  }, [bpm, userEmail, hasAutoSaved, countdown]);
+  }, [bpm, isWifiConnected, userEmail, hasAutoSaved, countdown]);
 
   // 3. Countdown Ticker
   useEffect(() => {
