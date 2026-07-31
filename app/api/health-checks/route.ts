@@ -5,6 +5,35 @@ export const dynamic = 'force-dynamic';
 
 const inMemoryHistory: HealthCheckRecord[] = [];
 
+function deduplicate(records: HealthCheckRecord[]): HealthCheckRecord[] {
+  const sorted = [...records].sort((a, b) => {
+    const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return timeB - timeA;
+  });
+
+  const result: HealthCheckRecord[] = [];
+  for (const item of sorted) {
+    const itemTime = item.created_at ? new Date(item.created_at).getTime() : 0;
+    const isDup = result.some(ex => {
+      if (ex.id && item.id && String(ex.id) === String(item.id)) return true;
+      const exTime = ex.created_at ? new Date(ex.created_at).getTime() : 0;
+      return (
+        ex.user_email === item.user_email &&
+        Math.abs(exTime - itemTime) < 10000 &&
+        ex.bpm === item.bpm &&
+        Math.abs(ex.suhu_objek - item.suhu_objek) < 0.1
+      );
+    });
+
+    if (!isDup) {
+      result.push(item);
+    }
+  }
+
+  return result;
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const email = searchParams.get('email');
@@ -23,30 +52,20 @@ export async function GET(request: Request) {
       .eq('user_email', email)
       .order('created_at', { ascending: false });
 
-    if (!error && Array.isArray(data)) {
+    if (error) {
+      console.warn('Supabase SELECT error:', error.message);
+    } else if (Array.isArray(data)) {
       supabaseRecords = data;
     }
   } catch (err) {
-    console.warn('Supabase fetch error:', err);
+    console.warn('Supabase fetch exception:', err);
   }
 
   // Filter in-memory records strictly by logged in user email
   const memRecords = inMemoryHistory.filter(h => h.user_email === email);
 
-  // Merge Supabase records and memory records, deduplicating by ID/created_at
-  const recordMap = new Map<string, HealthCheckRecord>();
-  for (const item of [...memRecords, ...supabaseRecords]) {
-    const key = item.id || `${item.user_email}_${item.created_at}`;
-    if (!recordMap.has(key)) {
-      recordMap.set(key, item);
-    }
-  }
-
-  const combined = Array.from(recordMap.values()).sort((a, b) => {
-    const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
-    const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
-    return timeB - timeA;
-  });
+  // Merge Supabase records and memory records with smart deduplication
+  const combined = deduplicate([...memRecords, ...supabaseRecords]);
 
   return NextResponse.json({ success: true, data: combined });
 }
@@ -91,7 +110,9 @@ export async function POST(request: Request) {
         status_kesehatan: newRecord.status_kesehatan,
       }]).select();
 
-      if (!error && data && data.length > 0) {
+      if (error) {
+        console.warn('Supabase INSERT error:', error.message);
+      } else if (data && data.length > 0) {
         return NextResponse.json({
           success: true,
           message: 'Berhasil menyimpan tes kesehatan ke Supabase',
