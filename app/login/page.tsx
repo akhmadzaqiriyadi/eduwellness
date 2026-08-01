@@ -28,21 +28,41 @@ export default function LoginPage() {
     setErrorMsg('');
     setSuccessMsg('');
 
+    const isLoginAdmin = role === 'admin' || email.toLowerCase().includes('admin');
+
+    // 1. Strict Admin Password Verification
+    if (isLoginAdmin) {
+      const validAdminPassword = 'admin123456';
+      if (password !== validAdminPassword) {
+        setErrorMsg('❌ Kata sandi Admin salah! Akses ditolak.');
+        setLoading(false);
+        return;
+      }
+    } else {
+      // 2. Strict User Password Validation
+      if (!password || password.length < 6) {
+        setErrorMsg('❌ Kata sandi minimal 6 karakter!');
+        setLoading(false);
+        return;
+      }
+    }
+
+    // 3. Supabase Authentication Check if Configured
     try {
       if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://your-supabase-project.supabase.co') {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
         if (error && !error.message.toLowerCase().includes('email not confirmed')) {
-          console.warn('Supabase auth warning, using local session:', error);
+          setErrorMsg('❌ Email atau kata sandi tidak cocok di database Supabase.');
+          setLoading(false);
+          return;
         }
       }
 
-      // Automatically assign admin role if logging in with admin email
-      const activeRole: UserRole = email.toLowerCase().includes('admin') || role === 'admin' ? 'admin' : 'user';
-      
+      const activeRole: UserRole = isLoginAdmin ? 'admin' : 'user';
       saveSession(email, activeRole);
       setSuccessMsg(`Login berhasil sebagai ${activeRole === 'admin' ? 'Admin' : 'Siswa'}! Mengalihkan...`);
 
@@ -50,12 +70,7 @@ export default function LoginPage() {
         router.push(activeRole === 'admin' ? '/riwayat' : '/dashboard');
       }, 800);
     } catch (err: any) {
-      const activeRole: UserRole = email.toLowerCase().includes('admin') || role === 'admin' ? 'admin' : 'user';
-      saveSession(email, activeRole);
-      setSuccessMsg(`Login berhasil sebagai ${activeRole === 'admin' ? 'Admin' : 'Siswa'}!`);
-      setTimeout(() => {
-        router.push(activeRole === 'admin' ? '/riwayat' : '/dashboard');
-      }, 800);
+      setErrorMsg('❌ Gagal memproses login: ' + (err.message || 'Error sistem'));
     } finally {
       setLoading(false);
     }
