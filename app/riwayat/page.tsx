@@ -323,7 +323,7 @@ export default function RiwayatPage() {
               { value: 'Semua', label: 'Semua Status Kesehatan' },
               { value: 'Normal', label: 'Normal' },
               { value: 'Demam', label: 'Demam (>= 37.5°C)' },
-              { value: 'Hipotermia', label: 'Hipotermia (< 20.0°C)' },
+              { value: 'Hipotermia', label: 'Hipotermia (32.0 - 34.9°C)' },
               { value: 'Tinggi', label: 'Takikardia (BPM Tinggi)' },
             ]}
             value={statusFilter}

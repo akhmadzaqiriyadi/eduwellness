@@ -97,7 +97,7 @@ export function getBpmStatus(bpm: number): HealthStatusResult {
  */
 export function generateHealthRecommendation(suhuObjek: number, bpm: number): HealthRecommendation {
   const isFever = suhuObjek >= 37.5;
-  const isHypo = suhuObjek < 20.0;
+  const isHypo = suhuObjek >= 32.0 && suhuObjek < 35.0;
   const isHighBpm = bpm > 100;
   const isLowBpm = bpm > 0 && bpm < 50;
 

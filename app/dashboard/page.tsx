@@ -222,7 +222,7 @@ export default function DashboardPage() {
 
   const getSuhuStatus = () => {
     if (suhuObjek >= 37.5) return { text: 'Demam ⚠️', color: 'text-amber-700 bg-amber-50 border-amber-200' };
-    if (suhuObjek <= 35.0) return { text: 'Hipotermia ⚠️', color: 'text-sky-700 bg-sky-50 border-sky-200' };
+    if (suhuObjek >= 32.0 && suhuObjek < 35.0) return { text: 'Hipotermia ⚠️', color: 'text-sky-700 bg-sky-50 border-sky-200' };
     return { text: 'Normal ✅', color: 'text-emerald-700 bg-emerald-50 border-emerald-200' };
   };
 
