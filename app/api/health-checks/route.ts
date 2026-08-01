@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabase, HealthCheckRecord } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 const inMemoryHistory: HealthCheckRecord[] = [];
 
@@ -81,9 +82,15 @@ export async function POST(request: Request) {
     }
 
     let status = 'Normal';
-    if (suhu_objek >= 37.5) status = 'Demam';
-    else if (suhu_objek <= 35.0) status = 'Hipotermia';
-    else if (bpm > 100) status = 'Takikardia (Denyut Tinggi)';
+    if (suhu_objek >= 37.5) {
+      status = 'Demam';
+    } else if (suhu_objek >= 32.0 && suhu_objek < 35.0) {
+      status = 'Hipotermia';
+    } else if (suhu_objek < 32.0) {
+      status = 'Normal'; // Room air reading when sensor is not pressed on skin
+    } else if (bpm > 100) {
+      status = 'Takikardia (Denyut Tinggi)';
+    }
 
     const newRecord: HealthCheckRecord = {
       id: Date.now().toString(),

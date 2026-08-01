@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { globalLiveState, updateGlobalLiveState } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 // GET: Live Dashboard reads latest sensor data + Wi-Fi status
 export async function GET() {

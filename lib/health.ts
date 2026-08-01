@@ -34,7 +34,7 @@ export function getTemperatureStatus(suhuObjek: number): HealthStatusResult {
       badgeBorder: 'border-amber-200',
     };
   }
-  if (suhuObjek < 20.0) {
+  if (suhuObjek >= 32.0 && suhuObjek < 35.0) {
     return {
       text: 'Hipotermia',
       color: 'text-sky-700 bg-sky-50 border-sky-200',

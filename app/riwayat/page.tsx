@@ -89,10 +89,10 @@ export default function RiwayatPage() {
       }
     } catch (e) {
       console.error('Error fetching history:', e);
-    } finally {
       if (localBackup.length > 0) {
         setHistory(localBackup);
       }
+    } finally {
       setLoading(false);
     }
   };
