@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Activity, Heart, Save, Clock, Zap, UserCheck, Lock, Timer, Wifi, WifiOff, Cpu, Signal, TrendingUp } from 'lucide-react';
+import { Activity, Heart, Save, Clock, Zap, UserCheck, Lock, Timer, Wifi, WifiOff, Cpu, Signal, TrendingUp, Loader2, HeartPulse } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 interface ChartPoint {
@@ -306,7 +306,7 @@ export default function DashboardPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-white/20 border border-white/30 backdrop-blur-md flex items-center justify-center text-white shrink-0">
-                <Timer className="w-6 h-6 animate-spin" />
+                <Loader2 className="w-6 h-6 animate-spin text-white" />
               </div>
               <div>
                 <h4 className="text-lg font-black text-white tracking-tight">
