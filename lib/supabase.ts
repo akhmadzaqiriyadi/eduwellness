@@ -33,8 +33,8 @@ export let globalLiveState: LiveSensorState = {
   suhuAmbient: 29.8,
   bpm: 0,
   updatedAt: new Date(0).toISOString(),
-  deviceId: 'WEMOS-D1-UTY',
-  wifiSsid: 'UTY-Network',
+  deviceId: 'WEMOS-D1-SMPN1SEYEGAN',
+  wifiSsid: 'SMPN1SEYEGAN-Network',
   isWifiConnected: false,
 };
 
@@ -48,8 +48,8 @@ export function updateGlobalLiveState(data: {
   globalLiveState = {
     ...data,
     updatedAt: new Date().toISOString(),
-    deviceId: data.deviceId || 'WEMOS-D1-UTY',
-    wifiSsid: data.wifiSsid || 'UTY-Network',
+    deviceId: data.deviceId || 'WEMOS-D1-SMPN1SEYEGAN',
+    wifiSsid: data.wifiSsid || 'SMPN1SEYEGAN-Network',
     isWifiConnected: true,
   };
 }

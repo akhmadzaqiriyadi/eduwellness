@@ -2,35 +2,35 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LogOut, Heart } from 'lucide-react';
+import { LogOut, Heart, Sparkles, ShieldCheck, Activity, Clock, BookOpen, Crown } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { getCurrentSession, clearSession, UserSession } from '@/lib/auth';
 
 export default function Navbar() {
   const pathname = usePathname();
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [session, setSession] = useState<UserSession | null>(null);
 
   useEffect(() => {
-    const email = localStorage.getItem('eduwellness_user_email');
-    if (email) setUserEmail(email);
+    setSession(getCurrentSession());
   }, [pathname]);
 
   const handleLogout = () => {
-    localStorage.removeItem('eduwellness_user_email');
-    localStorage.removeItem('eduwellness_user_name');
-    setUserEmail(null);
+    clearSession();
+    setSession(null);
     window.location.href = '/';
   };
 
   const navLinks = [
     { href: '/', label: 'Beranda' },
-    { href: '/edukasi', label: 'Edukasi Kesehatan' },
+    { href: '/edukasi', label: 'Edukasi' },
     { href: '/phbs', label: 'PHBS' },
-    { href: '/dashboard', label: 'Status Kesehatan' },
-    { href: '/riwayat', label: 'Riwayat Tes' },
+    { href: '/dashboard', label: 'Status Live' },
+    { href: '/rekomendasi', label: 'Rekomendasi' },
+    { href: '/riwayat', label: 'Riwayat' },
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-sky-100/90 shadow-sm transition-all">
+    <header className="sticky top-0 z-50 bg-white/85 backdrop-blur-md border-b border-sky-100/90 shadow-sm transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           
@@ -50,14 +50,14 @@ export default function Navbar() {
           </Link>
 
           {/* NAVIGATION LINKS */}
-          <nav className="hidden md:flex items-center gap-1.5 bg-sky-50/70 p-1.5 rounded-full border border-sky-100">
+          <nav className="hidden md:flex items-center gap-1 bg-sky-50/80 p-1.5 rounded-full border border-sky-100">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-5 py-2 rounded-full text-xs font-bold transition-all ${
+                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
                     isActive
                       ? 'bg-sky-500 text-white shadow-md shadow-sky-500/20'
                       : 'text-slate-600 hover:text-sky-600 hover:bg-white/60'
@@ -69,16 +69,28 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* RIGHT ACTION BUTTONS */}
+          {/* RIGHT ACTION BUTTONS & USER ROLE BADGE */}
           <div className="flex items-center gap-3">
-            {userEmail ? (
-              <div className="flex items-center gap-3">
-                <span className="hidden sm:inline-block text-xs font-semibold text-slate-600 bg-sky-50 px-3 py-1.5 rounded-full border border-sky-100">
-                  👤 {userEmail.split('@')[0]}
-                </span>
+            {session ? (
+              <div className="flex items-center gap-2.5">
+                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-extrabold ${
+                  session.role === 'admin' 
+                    ? 'bg-amber-50 border-amber-200 text-amber-700' 
+                    : 'bg-sky-50 border-sky-200 text-sky-700'
+                }`}>
+                  {session.role === 'admin' ? (
+                    <>
+                      <Crown className="w-3.5 h-3.5 text-amber-500" />
+                      <span>Admin</span>
+                    </>
+                  ) : (
+                    <span>{session.name}</span>
+                  )}
+                </div>
+
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 rounded-full bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-100 font-bold text-xs flex items-center gap-1.5 transition-all"
+                  className="px-3.5 py-1.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 font-bold text-xs flex items-center gap-1 transition-all"
                 >
                   <LogOut className="w-3.5 h-3.5" /> Logout
                 </button>
@@ -87,7 +99,7 @@ export default function Navbar() {
               <div className="flex items-center gap-2">
                 <Link
                   href="/login"
-                  className="px-5 py-2.5 rounded-full text-xs font-bold text-slate-700 hover:text-sky-600 transition-all"
+                  className="px-4 py-2 rounded-full text-xs font-bold text-slate-700 hover:text-sky-600 transition-all"
                 >
                   Masuk
                 </Link>
@@ -95,7 +107,7 @@ export default function Navbar() {
                   href="/register"
                   className="px-5 py-2.5 rounded-full bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-xs shadow-md shadow-sky-500/25 hover:scale-105 transition-all"
                 >
-                  Daftar Gratis 🎉
+                  Daftar Gratis
                 </Link>
               </div>
             )}

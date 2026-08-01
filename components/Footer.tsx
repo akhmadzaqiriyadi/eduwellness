@@ -24,6 +24,7 @@ export default function Footer() {
             <ul className="space-y-2 text-xs font-semibold">
               <li><Link href="/" className="hover:text-sky-600">Beranda</Link></li>
               <li><Link href="/dashboard" className="hover:text-sky-600">IoT Live Dashboard</Link></li>
+              <li><Link href="/rekomendasi" className="hover:text-sky-600">Rekomendasi Kesehatan</Link></li>
               <li><Link href="/riwayat" className="hover:text-sky-600">Riwayat Pengecekan</Link></li>
               <li><Link href="/edukasi" className="hover:text-sky-600">Health Education Hub</Link></li>
               <li><Link href="/phbs" className="hover:text-sky-600">10 Kebiasaan PHBS</Link></li>
@@ -33,10 +34,10 @@ export default function Footer() {
           <div>
             <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider mb-3">Modul Edukasi</h4>
             <ul className="space-y-2 text-xs font-semibold">
-              <li><Link href="/edukasi#rokok" className="hover:text-sky-600">🚭 Bahaya Rokok</Link></li>
-              <li><Link href="/edukasi#menstruasi" className="hover:text-sky-600">🌸 Kesehatan Menstruasi</Link></li>
-              <li><Link href="/edukasi#pola-makan" className="hover:text-sky-600">🍎 Pola Makan Sehat</Link></li>
-              <li><Link href="/phbs" className="hover:text-sky-600">🧼 10 Kebiasaan PHBS</Link></li>
+              <li><Link href="/edukasi#rokok" className="hover:text-sky-600">Bahaya Rokok</Link></li>
+              <li><Link href="/edukasi#menstruasi" className="hover:text-sky-600">Kesehatan Menstruasi</Link></li>
+              <li><Link href="/edukasi#pola-makan" className="hover:text-sky-600">Pola Makan Sehat</Link></li>
+              <li><Link href="/phbs" className="hover:text-sky-600">10 Kebiasaan PHBS</Link></li>
             </ul>
           </div>
 
@@ -56,7 +57,7 @@ export default function Footer() {
         <div className="border-t border-sky-100 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500">
           <p>© 2026 EduWellness Indonesia. Hak Cipta Dilindungi.</p>
           <p className="flex items-center gap-1 font-semibold text-sky-600 mt-2 sm:mt-0">
-            Dibuat khusus untuk Literasi Kesehatan Siswa 💙
+            Dibuat khusus untuk Literasi Kesehatan Siswa
           </p>
         </div>
       </div>

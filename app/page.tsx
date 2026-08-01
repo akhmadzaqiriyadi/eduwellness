@@ -19,7 +19,7 @@ export default function HomePage() {
 
             <h1 className="text-4xl sm:text-6xl font-black text-slate-900 leading-[1.15] tracking-tight">
               Hidup Sehat <br />
-              <span className="text-gradient">Dimulai dari Sini ✨</span>
+              <span className="text-gradient">Dimulai dari Sini</span>
             </h1>
 
             <p className="text-slate-600 text-base sm:text-lg max-w-xl leading-relaxed font-normal">
@@ -38,7 +38,7 @@ export default function HomePage() {
                 href="/edukasi"
                 className="px-8 py-4 rounded-full bg-white hover:bg-sky-50 text-slate-700 border border-sky-200 font-extrabold text-sm flex items-center gap-2 shadow-sm transition-all"
               >
-                Mulai Belajar 📚
+                Mulai Belajar
               </Link>
             </div>
           </div>
@@ -65,7 +65,7 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8 text-center">
         <div className="space-y-2 max-w-2xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900">
-            Fitur Keren 🚀
+            Fitur Keren
           </h2>
           <p className="text-slate-600 text-sm">
             Teknologi IoT bertemu edukasi kesehatan — semua dalam satu genggaman
@@ -151,7 +151,7 @@ export default function HomePage() {
               <span>Literasi Digital Kesehatan Siswa</span>
             </div>
             <h3 className="text-3xl font-extrabold text-slate-900 leading-tight">
-              Siap Jadi Versi Terbaik Dirimu? 💪
+              Siap Jadi Versi Terbaik Dirimu?
             </h3>
             <p className="text-slate-600 text-sm leading-relaxed">
               Daftar sekarang dan mulai pantau kesehatanmu dengan teknologi IoT terkini. Dapatkan wawasan kesehatan lengkap secara gratis!
@@ -161,7 +161,7 @@ export default function HomePage() {
                 href="/register"
                 className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-xs shadow-lg shadow-sky-500/25 hover:scale-105 transition-all"
               >
-                Daftar Gratis 🎉
+                Daftar Gratis
               </Link>
             </div>
           </div>

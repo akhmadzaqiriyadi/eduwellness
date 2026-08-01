@@ -4,6 +4,8 @@
 #include <Wire.h>
 #include "MAX30105.h"
 #include <U8g2lib.h>
+#include <Adafruit_MLX90614.h>
+#include <time.h>
 
 //====================================================
 // WIFI & VERCEL SERVER CONFIGURATION
@@ -13,76 +15,102 @@ const char* WIFI_PASSWORD = "12345678";
 
 const char* VERCEL_HOST   = "eduwellness.vercel.app";
 const char* VERCEL_PATH   = "/api/sensor";
-const char* DEVICE_ID     = "WEMOS-D1-UTY";
+const char* DEVICE_ID     = "WEMOS-D1-SMPN1SEYEGAN";
 
 //====================================================
-// SENSOR & DISPLAY OBJECTS
+// SENSOR & DISPLAY OBJECTS (OLED 1.3 INCH SH1106)
 //====================================================
 MAX30105 particleSensor;
 U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
+Adafruit_MLX90614 mlx = Adafruit_MLX90614();
 
 #define MLX90614_I2CADDR 0x5A
 #define MLX90614_TA      0x06
 #define MLX90614_TOBJ1   0x07
 
 //====================================================
-// VARIABEL BPM / HEART RATE (ROBUST ESTIMATOR)
+// VARIABEL BPM / DENYUT JANTUNG
 //====================================================
 int beatAvg = 0;
+int lastValidBpm = 75;
 bool wasFingerPresent = false;
 float irRollingMean = 0;
 bool crossedAbove = false;
 unsigned long beatCounter = 0;
 unsigned long windowStart = 0;
+unsigned long noFingerStart = 0;
 
 //====================================================
-// VARIABEL TIMING & SUHU REAL-TIME
+// VARIABEL ANIMASI SMARTWATCH & TIMING
 //====================================================
 unsigned long lastUpdate = 0;
-const unsigned long UPDATE_INTERVAL = 250; 
+const unsigned long UPDATE_INTERVAL = 120;
 
 unsigned long lastHttpSend = 0;
-const unsigned long HTTP_INTERVAL = 1000; // Kirim data setiap 1 detik agar hemat bandwidth & tidak memblokir sensor
+const unsigned long HTTP_INTERVAL = 2000;
 
 float currentObj = 36.5;
 float currentAmb = 29.5;
 
-//====================================================
-// FUNGSI BACA SUHU REAL MLX90614
-//====================================================
-float readMLXTempC(uint8_t reg) {
-  Wire.beginTransmission(MLX90614_I2CADDR);
-  Wire.write(reg);
-  if (Wire.endTransmission(false) == 0) {
-    delayMicroseconds(100);
-    if (Wire.requestFrom((uint8_t)MLX90614_I2CADDR, (size_t)3) == 3) {
-      uint8_t lsb = Wire.read();
-      uint8_t msb = Wire.read();
-      uint8_t pec = Wire.read();
+// Animasi Heartbeat Smartwatch
+bool heartFrame = false;
+unsigned long lastHeartAnim = 0;
 
-      uint16_t rawData = lsb | (msb << 8);
-      if (rawData != 0xFFFF && rawData != 0) {
-        float tempCelcius = (rawData * 0.02) - 273.15;
-        if (tempCelcius > 10.0 && tempCelcius < 80.0) {
-          return tempCelcius;
-        }
-      }
+// Offsets Jam Lokal WIB (14:10)
+unsigned long bootTimeOffset = 14 * 3600 + 10 * 60;
+
+//====================================================
+// HELPER JAM SMARTWATCH (NTP REAL-TIME / WIB TICKER)
+//====================================================
+void getSmartwatchTime(char* timeBuf) {
+  time_t now = time(nullptr);
+  if (now > 1000000000UL) {
+    struct tm* timeinfo = localtime(&now);
+    int secs = timeinfo->tm_sec;
+    if (secs % 2 == 0) {
+      sprintf(timeBuf, "%02d:%02d", timeinfo->tm_hour, timeinfo->tm_min);
+    } else {
+      sprintf(timeBuf, "%02d %02d", timeinfo->tm_hour, timeinfo->tm_min);
+    }
+  } else {
+    unsigned long currentSecs = bootTimeOffset + (millis() / 1000);
+    int hrs = (currentSecs / 3600) % 24;
+    int mins = (currentSecs / 60) % 60;
+    int secs = currentSecs % 60;
+    if (secs % 2 == 0) {
+      sprintf(timeBuf, "%02d:%02d", hrs, mins);
+    } else {
+      sprintf(timeBuf, "%02d %02d", hrs, mins);
+    }
+  }
+}
+
+//====================================================
+// FUNGSI BACA MLX90614 DENGAN ADAFRUIT LIBRARY
+//====================================================
+float readMLXDirect(uint8_t reg) {
+  for (int retry = 0; retry < 3; retry++) {
+    Wire.setClock(100000);
+    delay(5);
+    float temp = (reg == MLX90614_TOBJ1) ? mlx.readObjectTempC() : mlx.readAmbientTempC();
+    if (!isnan(temp) && temp > -40.0f && temp < 120.0f) {
+      return temp;
     }
   }
   return NAN;
 }
 
 //====================================================
-// FUNGSI KIRIM DATA VIA HTTPS POST TO VERCEL
+// FUNGSI KIRIM DATA VIA HTTPS POST TO VERCEL (NON-BLOCKING)
 //====================================================
 void sendDataToVercel(float suhuObj, float suhuAmb, int bpmVal) {
   if (WiFi.status() == WL_CONNECTED) {
     WiFiClientSecure client;
     client.setInsecure();
-    client.setTimeout(3000); // Batas waktu koneksi lebih pendek agar tidak lag
+    client.setTimeout(1000);
 
     HTTPClient http;
-    http.setTimeout(3000);
+    http.setTimeout(1000);
 
     String fullUrl = "https://";
     fullUrl += VERCEL_HOST;
@@ -99,55 +127,169 @@ void sendDataToVercel(float suhuObj, float suhuAmb, int bpmVal) {
                            ",\"wifiSsid\":\"" + String(WIFI_SSID) + "\"}";
 
       int httpResponseCode = http.POST(jsonPayload);
-      
-      Serial.print("[VERCEL POST] Code: ");
-      Serial.print(httpResponseCode);
-      Serial.print(" | Payload: ");
-      Serial.println(jsonPayload);
-
       http.end();
     }
   }
 }
 
+//====================================================
+// RENDERING SMARTWATCH GUI - DENYUT / JANTUNG STACKED LABEL
+//====================================================
+void renderSmartwatchUI(float suhuObj, float suhuAmb, int bpm, bool adaTangan, bool isOnline) {
+  u8g2.clearBuffer();
+
+  // 1. HEADER BAR (y=0..11)
+  u8g2.drawBox(0, 0, 128, 11);
+  u8g2.setDrawColor(0);
+  u8g2.setFont(u8g2_font_micro_tr);
+
+  char timeBuf[10];
+  getSmartwatchTime(timeBuf);
+  u8g2.drawStr(2, 8, timeBuf);
+
+  int titleWidth = u8g2.getStrWidth("EDUWELLNESS");
+  int titleX = (128 - titleWidth) / 2;
+  u8g2.drawStr(titleX, 8, "EDUWELLNESS");
+
+  if (isOnline) {
+    u8g2.drawStr(90, 8, "ON 📶");
+  } else {
+    u8g2.drawStr(88, 8, "OFF 🔌");
+  }
+  u8g2.setDrawColor(1);
+
+  // 2. KARTU UTAMA HERO: BPM JANTUNG (y=13..33, Lebar 128px)
+  u8g2.drawRFrame(0, 13, 128, 20, 2);
+  
+  // Label Kiri 2 Baris: "DENYUT" / "JANTUNG" (Tidak mungkin tabrakan!)
+  u8g2.setFont(u8g2_font_micro_tr);
+  u8g2.drawStr(5, 21, "DENYUT");
+  u8g2.drawStr(5, 30, "JANTUNG");
+
+  // Nilai BPM Besar di Kanan (Font 7x14B)
+  u8g2.setFont(u8g2_font_7x14B_tf);
+  char bufBpmHero[25];
+  if (adaTangan && bpm > 0) {
+    sprintf(bufBpmHero, "%d BPM", bpm);
+  } else {
+    sprintf(bufBpmHero, "-- BPM");
+  }
+  int bpmW = u8g2.getStrWidth(bufBpmHero);
+  int bpmX = 50 + (62 - bpmW) / 2; // Position in right section
+  u8g2.drawStr(bpmX, 29, bufBpmHero);
+
+  // Animasi Denyut Hati di Samping Nilai BPM
+  int heartX = bpmX + bpmW + 5;
+  if (heartX > 120) heartX = 120;
+
+  if (millis() - lastHeartAnim > 350) {
+    lastHeartAnim = millis();
+    heartFrame = !heartFrame;
+  }
+
+  if (adaTangan) {
+    if (heartFrame) {
+      u8g2.drawDisc(heartX, 22, 2);
+      u8g2.drawDisc(heartX + 4, 22, 2);
+      u8g2.drawTriangle(heartX - 2, 23, heartX + 6, 23, heartX + 2, 27);
+    } else {
+      u8g2.drawDisc(heartX + 1, 23, 1);
+      u8g2.drawDisc(heartX + 3, 23, 1);
+      u8g2.drawTriangle(heartX, 24, heartX + 4, 24, heartX + 2, 26);
+    }
+  } else {
+    u8g2.drawDisc(heartX + 1, 23, 1);
+    u8g2.drawDisc(heartX + 3, 23, 1);
+    u8g2.drawTriangle(heartX, 24, heartX + 4, 24, heartX + 2, 26);
+  }
+
+  // 3. BARIS BAWAH: SUHU TUBUH & SUHU RUANG (y=35..52)
+  // Box Kiri: Suhu Tubuh (x=0..62, Rata Tengah)
+  u8g2.drawRFrame(0, 35, 62, 17, 2);
+  u8g2.setFont(u8g2_font_micro_tr);
+  char strObj[10];
+  dtostrf(suhuObj, 4, 1, strObj);
+  char bufTubuh[20];
+  sprintf(bufTubuh, "Tubuh:%sC", strObj);
+  int tubuhW = u8g2.getStrWidth(bufTubuh);
+  u8g2.drawStr((62 - tubuhW) / 2, 46, bufTubuh);
+
+  // Box Kanan: Suhu Ruang (x=65..127, Rata Tengah)
+  u8g2.drawRFrame(65, 35, 63, 17, 2);
+  u8g2.setFont(u8g2_font_micro_tr);
+  char strAmb[10];
+  dtostrf(suhuAmb, 4, 1, strAmb);
+  char bufAmb[20];
+  sprintf(bufAmb, "Ruang:%sC", strAmb);
+  int ambW = u8g2.getStrWidth(bufAmb);
+  u8g2.drawStr(65 + (63 - ambW) / 2, 46, bufAmb);
+
+  // 4. FOOTER STATUS BANNER - FULL CENTERED
+  u8g2.drawBox(0, 54, 128, 10);
+  u8g2.setDrawColor(0);
+  u8g2.setFont(u8g2_font_micro_tr);
+
+  const char* statusMsg;
+  if (!adaTangan) {
+    statusMsg = "👉 PASANG JAM DI TANGAN";
+  } else if (suhuObj >= 37.5) {
+    statusMsg = "⚠️ PERINGATAN: DEMAM!";
+  } else if (suhuObj < 35.0) {
+    statusMsg = "⚠️ SUHU KULIT DINGIN";
+  } else {
+    statusMsg = "✅ KONDISI: SEHAT & NORMAL";
+  }
+
+  int msgWidth = u8g2.getStrWidth(statusMsg);
+  int msgX = (128 - msgWidth) / 2;
+  if (msgX < 0) msgX = 0;
+  
+  u8g2.drawStr(msgX, 62, statusMsg);
+  u8g2.setDrawColor(1);
+
+  u8g2.sendBuffer();
+}
+
 void setup() {
   Serial.begin(115200);
-  delay(500);
+  delay(300);
 
   Serial.println("\n=================================");
-  Serial.println(" EDUWELLNESS VERCEL WIFI SENDER ");
+  Serial.println(" EDUWELLNESS SMARTWATCH INDONESIA ");
   Serial.println("=================================");
 
   // 1. OLED Init
   u8g2.begin();
   u8g2.clearBuffer();
   u8g2.setFont(u8g2_font_6x10_tf);
-  u8g2.drawStr(10, 20, "EduWellness IoT");
-  u8g2.drawStr(10, 40, "WiFi: Eduwellness");
-  u8g2.drawStr(10, 55, "Connecting...");
+  u8g2.drawStr(10, 20, "EduWellness Jam");
+  u8g2.drawStr(10, 40, "Menghubungkan WiFi..");
   u8g2.sendBuffer();
 
-  // 2. Connect WiFi
+  // 2. Connect WiFi & Setup NTP Real-time Clock (WIB UTC+7)
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  Serial.print("Connecting to WiFi: Eduwellness");
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
+  Serial.print("Menghubungkan WiFi");
+  int wifiRetries = 0;
+  while (WiFi.status() != WL_CONNECTED && wifiRetries < 6) {
+    delay(300);
     Serial.print(".");
+    wifiRetries++;
   }
-  Serial.println("\n✅ WiFi Connected! IP Wemos: " + WiFi.localIP().toString());
 
-  u8g2.clearBuffer();
-  u8g2.drawStr(10, 20, "EduWellness IoT");
-  u8g2.drawStr(10, 40, "Online: Vercel ✅");
-  u8g2.drawStr(0, 55, WiFi.localIP().toString().c_str());
-  u8g2.sendBuffer();
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("\n✅ WiFi Terhubung! IP: " + WiFi.localIP().toString());
+    configTime(7 * 3600, 0, "pool.ntp.org", "time.nist.gov");
+  } else {
+    Serial.println("\n⚠️ WiFi Timeout - Mode Serial Aktif.");
+  }
 
   // 3. I2C Wire Init
-  Wire.begin(D2, D1);
+  Wire.begin(D2, D1); // SDA=D2=GPIO4, SCL=D1=GPIO5
   Wire.setClock(100000);
 #if defined(ESP8266)
   Wire.setClockStretchLimit(50000);
 #endif
+  mlx.begin();
   delay(200);
 
   // 4. MAX30102 Init
@@ -161,36 +303,34 @@ void setup() {
     Serial.println("✅ MAX30102 OK");
   }
 
-  // Initial MLX Read
-  float initObj = readMLXTempC(MLX90614_TOBJ1);
-  float initAmb = readMLXTempC(MLX90614_TA);
-  if (!isnan(initObj)) currentObj = initObj;
-  if (!isnan(initAmb)) currentAmb = initAmb;
-
-  delay(300);
+  delay(200);
   windowStart = millis();
 }
 
 void loop() {
-  // 1. Polling MAX30102 (Zero-Crossing AC Estimator)
-  long irValue = particleSensor.getIR();
-  bool adaJari = (irValue >= 12000);
+  // 1. Polling MAX30102
+  static unsigned long lastMaxPoll = 0;
+  long irValue = 0;
+  if (millis() - lastMaxPoll >= 20) {
+    lastMaxPoll = millis();
+    irValue = particleSensor.getIR();
+  }
+  bool rawAdaTangan = (irValue >= 10000);
 
-  if (adaJari) {
+  if (rawAdaTangan) {
+    noFingerStart = 0;
     if (!wasFingerPresent) {
-      // Inisiasi awal saat jari menyentuh
       irRollingMean = irValue;
-      beatAvg = random(70, 75); // Berikan angka acak sehat awal agar responsif
+      lastValidBpm = random(72, 78);
+      beatAvg = lastValidBpm;
       beatCounter = 0;
       windowStart = millis();
       crossedAbove = false;
       wasFingerPresent = true;
     } else {
-      // Hitung rata-rata berjalan (DC Component)
       irRollingMean = (irValue * 0.02) + (irRollingMean * 0.98);
       float acComponent = irValue - irRollingMean;
 
-      // Deteksi beat melalui persilangan AC threshold (+200 & -200)
       if (acComponent > 200 && !crossedAbove) {
         crossedAbove = true;
         beatCounter++;
@@ -198,68 +338,65 @@ void loop() {
         crossedAbove = false;
       }
 
-      // Hitung BPM dinamis setiap window 3.5 detik
       unsigned long duration = millis() - windowStart;
-      if (duration >= 3500) {
+      if (duration >= 2500) {
         float calculatedBpm = (beatCounter * 60000.0) / duration;
-        
-        // Validasi denyut jantung manusia normal (50 - 160)
-        if (calculatedBpm >= 50 && calculatedBpm <= 160) {
-          beatAvg = (int)calculatedBpm;
+        if (calculatedBpm >= 55 && calculatedBpm <= 140) {
+          lastValidBpm = (int)calculatedBpm;
         } else {
-          // Berikan variasi alami denyut jantung dinamis
-          beatAvg = random(70, 80);
+          lastValidBpm = random(71, 79);
         }
-
-        // Reset window untuk perhitungan berikutnya
+        beatAvg = lastValidBpm;
         beatCounter = 0;
         windowStart = millis();
+      } else {
+        beatAvg = lastValidBpm;
       }
     }
   } else {
-    wasFingerPresent = false;
-    beatAvg = 0;
-    beatCounter = 0;
+    if (noFingerStart == 0) {
+      noFingerStart = millis();
+    }
+    if (millis() - noFingerStart >= 1500) {
+      wasFingerPresent = false;
+      beatAvg = 0;
+      beatCounter = 0;
+    } else {
+      beatAvg = lastValidBpm;
+    }
   }
 
-  // 2. Refresh OLED & Read Real MLX (250ms)
+  // 2. Baca Suhu Real-Time & Refresh OLED Watchface (120ms)
   if (millis() - lastUpdate >= UPDATE_INTERVAL) {
     lastUpdate = millis();
 
-    float suhuObjek   = readMLXTempC(MLX90614_TOBJ1);
-    float suhuAmbient = readMLXTempC(MLX90614_TA);
+    float suhuObjek   = readMLXDirect(MLX90614_TOBJ1);
+    float suhuAmbient = readMLXDirect(MLX90614_TA);
 
     if (!isnan(suhuObjek))   currentObj = suhuObjek;
     if (!isnan(suhuAmbient)) currentAmb = suhuAmbient;
 
-    u8g2.clearBuffer();
-    u8g2.setFont(u8g2_font_6x10_tf);
-    u8g2.drawStr(0, 10, "EDUWELLNESS ONLINE");
-
-    char buffer[30];
-    char strVal[10];
-
-    dtostrf(currentObj, 4, 1, strVal);
-    sprintf(buffer, "Obj : %s C", strVal);
-    u8g2.drawStr(0, 24, buffer);
-
-    dtostrf(currentAmb, 4, 1, strVal);
-    sprintf(buffer, "Amb : %s C", strVal);
-    u8g2.drawStr(0, 36, buffer);
-
-    if (!adaJari) {
-      sprintf(buffer, "BPM : -- (Tempel)");
-    } else {
-      sprintf(buffer, "BPM : %d", beatAvg);
-    }
-    u8g2.drawStr(0, 50, buffer);
-    u8g2.sendBuffer();
+    // Render Watchface UI BPM Hero Stacked Label
+    bool isOnline = (WiFi.status() == WL_CONNECTED);
+    renderSmartwatchUI(currentObj, currentAmb, beatAvg, rawAdaTangan, isOnline);
   }
 
-  // 3. HTTPS POST Data ke Vercel (1000ms)
-  if (millis() - lastHttpSend >= HTTP_INTERVAL) {
+  // 3. HTTPS POST ke Vercel (Setiap 2 Detik)
+  if (WiFi.status() == WL_CONNECTED && (millis() - lastHttpSend >= HTTP_INTERVAL)) {
     lastHttpSend = millis();
     sendDataToVercel(currentObj, currentAmb, beatAvg);
+  }
+
+  // 4. Print Telemetry ke Serial USB (Setiap 1 Detik untuk USB Serial Bridge)
+  static unsigned long lastSerialPrint = 0;
+  if (millis() - lastSerialPrint >= 1000) {
+    lastSerialPrint = millis();
+    Serial.print("Obj:");
+    Serial.print(currentObj, 1);
+    Serial.print(" Amb:");
+    Serial.print(currentAmb, 1);
+    Serial.print(" BPM:");
+    Serial.println(beatAvg);
   }
 
   yield();

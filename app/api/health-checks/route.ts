@@ -38,19 +38,15 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const email = searchParams.get('email');
 
-  // Privacy Rule: If no email parameter is passed, return empty array for privacy
-  if (!email) {
-    return NextResponse.json({ success: true, data: [] });
-  }
-
   let supabaseRecords: HealthCheckRecord[] = [];
 
   try {
-    const { data, error } = await supabase
-      .from('health_checks')
-      .select('*')
-      .eq('user_email', email)
-      .order('created_at', { ascending: false });
+    let query = supabase.from('health_checks').select('*').order('created_at', { ascending: false });
+    if (email) {
+      query = query.eq('user_email', email);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.warn('Supabase SELECT error:', error.message);
@@ -61,8 +57,10 @@ export async function GET(request: Request) {
     console.warn('Supabase fetch exception:', err);
   }
 
-  // Filter in-memory records strictly by logged in user email
-  const memRecords = inMemoryHistory.filter(h => h.user_email === email);
+  // Filter in-memory records: if email is provided, filter by email; otherwise return all records for Admin
+  const memRecords = email 
+    ? inMemoryHistory.filter(h => h.user_email === email)
+    : inMemoryHistory;
 
   // Merge Supabase records and memory records with smart deduplication
   const combined = deduplicate([...memRecords, ...supabaseRecords]);
@@ -82,10 +80,10 @@ export async function POST(request: Request) {
       );
     }
 
-    let status = 'Normal ✅';
-    if (suhu_objek >= 37.5) status = 'Demam ⚠️';
-    else if (suhu_objek <= 35.0) status = 'Hipotermia ⚠️';
-    else if (bpm > 100) status = 'Takikardia (Denyut Tinggi) ⚠️';
+    let status = 'Normal';
+    if (suhu_objek >= 37.5) status = 'Demam';
+    else if (suhu_objek <= 35.0) status = 'Hipotermia';
+    else if (bpm > 100) status = 'Takikardia (Denyut Tinggi)';
 
     const newRecord: HealthCheckRecord = {
       id: Date.now().toString(),

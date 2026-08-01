@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Mail, Lock, User, UserPlus, CheckCircle2, AlertCircle, Sparkles, Heart } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { saveSession } from '@/lib/auth';
+import CustomSelect from '@/components/CustomSelect';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -36,8 +38,7 @@ export default function RegisterPage() {
         });
       }
 
-      localStorage.setItem('eduwellness_user_email', email);
-      localStorage.setItem('eduwellness_user_name', fullName);
+      saveSession(email, 'user', fullName);
 
       setSuccessMsg('Pendaftaran berhasil! Mengalihkan ke IoT Dashboard...');
       setTimeout(() => {
@@ -45,8 +46,7 @@ export default function RegisterPage() {
       }, 800);
     } catch (err: any) {
       console.warn('Supabase SignUp error, fallback to instant session:', err);
-      localStorage.setItem('eduwellness_user_email', email);
-      localStorage.setItem('eduwellness_user_name', fullName);
+      saveSession(email, 'user', fullName);
 
       setSuccessMsg('Pendaftaran berhasil (Instant Access)!');
       setTimeout(() => {
@@ -120,17 +120,17 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1.5">Kelas / Tingkat</label>
-            <select
+            <CustomSelect
+              options={[
+                { value: 'Kelas 10', label: 'Kelas 10 (SMA/SMK)' },
+                { value: 'Kelas 11', label: 'Kelas 11 (SMA/SMK)' },
+                { value: 'Kelas 12', label: 'Kelas 12 (SMA/SMK)' },
+                { value: 'SMP', label: 'SMP / Sederajat' },
+                { value: 'Umum', label: 'Umum / Lainnya' },
+              ]}
               value={grade}
-              onChange={(e) => setGrade(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-sky-100 text-sm text-slate-900 focus:outline-none focus:border-sky-500 focus:bg-white transition-all"
-            >
-              <option value="Kelas 10">Kelas 10 (SMA/SMK)</option>
-              <option value="Kelas 11">Kelas 11 (SMA/SMK)</option>
-              <option value="Kelas 12">Kelas 12 (SMA/SMK)</option>
-              <option value="SMP">SMP / Sederajat</option>
-              <option value="Umum">Umum / Lainnya</option>
-            </select>
+              onChange={setGrade}
+            />
           </div>
 
           <div>
@@ -159,7 +159,7 @@ export default function RegisterPage() {
             ) : (
               <>
                 <UserPlus className="w-4 h-4" />
-                Daftar Akun Gratis 🎉
+                Daftar Akun Gratis
               </>
             )}
           </button>

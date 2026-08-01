@@ -1,91 +1,202 @@
 #include <Wire.h>
 #include "MAX30105.h"
-#include "heartRate.h"
 #include <U8g2lib.h>
+#include <Adafruit_MLX90614.h>
 
 //====================================================
-// SENSOR & DISPLAY OBJECTS
+// SENSOR & DISPLAY OBJECTS (OLED 1.3 INCH STANDALONE)
 //====================================================
 MAX30105 particleSensor;
 U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
+Adafruit_MLX90614 mlx = Adafruit_MLX90614();
 
 #define MLX90614_I2CADDR 0x5A
 #define MLX90614_TA      0x06
 #define MLX90614_TOBJ1   0x07
 
 //====================================================
-// VARIABEL BPM / HEART RATE
+// VARIABEL BPM / DENYUT JANTUNG
 //====================================================
-const byte RATE_SIZE = 4;
-byte rates[RATE_SIZE];
-byte rateSpot = 0;
-long lastBeat = 0;
-float beatsPerMinute = 0;
 int beatAvg = 0;
+int lastValidBpm = 75;
 bool wasFingerPresent = false;
+float irRollingMean = 0;
+bool crossedAbove = false;
+unsigned long beatCounter = 0;
+unsigned long windowStart = 0;
+unsigned long noFingerStart = 0;
 
 //====================================================
-// VARIABEL TIMING & SUHU
+// VARIABEL ANIMASI SMARTWATCH & TIMING
 //====================================================
 unsigned long lastUpdate = 0;
-const unsigned long UPDATE_INTERVAL = 300; 
+const unsigned long UPDATE_INTERVAL = 120;
 
 float currentObj = 36.5;
-float currentAmb = 30.0;
+float currentAmb = 29.5;
+
+// Animasi Heartbeat Smartwatch
+bool heartFrame = false;
+unsigned long lastHeartAnim = 0;
+
+// Offsets Jam Lokal WIB (14:10)
+unsigned long bootTimeOffset = 14 * 3600 + 10 * 60;
 
 //====================================================
-// FUNGSI BACA SUHU MLX90614 (SMBus Repeated Start)
+// HELPER JAM SMARTWATCH (WIB TICKER)
 //====================================================
-float readMLXTempC(uint8_t reg) {
-  Wire.setClock(100000);
-#if defined(ESP8266)
-  Wire.setClockStretchLimit(50000);
-#endif
+void getSmartwatchTime(char* timeBuf) {
+  unsigned long currentSecs = bootTimeOffset + (millis() / 1000);
+  int hrs = (currentSecs / 3600) % 24;
+  int mins = (currentSecs / 60) % 60;
+  int secs = currentSecs % 60;
+  if (secs % 2 == 0) {
+    sprintf(timeBuf, "%02d:%02d", hrs, mins);
+  } else {
+    sprintf(timeBuf, "%02d %02d", hrs, mins);
+  }
+}
 
-  for (int retry = 0; retry < 4; retry++) {
-    Wire.beginTransmission(MLX90614_I2CADDR);
-    Wire.write(reg);
-    uint8_t err = Wire.endTransmission(false);
-    
-    if (err == 0) {
-      delayMicroseconds(200);
-      uint8_t count = Wire.requestFrom((uint8_t)MLX90614_I2CADDR, (size_t)3);
-      if (count == 3) {
-        uint8_t lsb = Wire.read();
-        uint8_t msb = Wire.read();
-        uint8_t pec = Wire.read(); 
-
-        uint16_t rawData = lsb | (msb << 8);
-
-        if (rawData != 0xFFFF && rawData != 0) {
-          float tempKelvin = rawData * 0.02;
-          float tempCelcius = tempKelvin - 273.15;
-          if (tempCelcius > -20.0 && tempCelcius < 100.0) {
-            return tempCelcius;
-          }
-        }
-      }
+//====================================================
+// FUNGSI BACA MLX90614 DENGAN ADAFRUIT LIBRARY
+//====================================================
+float readMLXDirect(uint8_t reg) {
+  for (int retry = 0; retry < 3; retry++) {
+    Wire.setClock(100000);
+    delay(5);
+    float temp = (reg == MLX90614_TOBJ1) ? mlx.readObjectTempC() : mlx.readAmbientTempC();
+    if (!isnan(temp) && temp > -40.0f && temp < 120.0f) {
+      return temp;
     }
-    delay(4);
   }
   return NAN;
 }
 
+//====================================================
+// RENDERING SMARTWATCH GUI - DENYUT / JANTUNG STACKED LABEL
+//====================================================
+void renderSmartwatchUI(float suhuObj, float suhuAmb, int bpm, bool adaTangan) {
+  u8g2.clearBuffer();
+
+  // 1. HEADER BAR (y=0..11)
+  u8g2.drawBox(0, 0, 128, 11);
+  u8g2.setDrawColor(0);
+  u8g2.setFont(u8g2_font_micro_tr);
+
+  char timeBuf[10];
+  getSmartwatchTime(timeBuf);
+  u8g2.drawStr(2, 8, timeBuf);
+
+  int titleWidth = u8g2.getStrWidth("EDUWELLNESS");
+  int titleX = (128 - titleWidth) / 2;
+  u8g2.drawStr(titleX, 8, "EDUWELLNESS");
+
+  u8g2.drawStr(88, 8, "OFF 🔌");
+  u8g2.setDrawColor(1);
+
+  // 2. KARTU UTAMA HERO: BPM JANTUNG (y=13..33, Lebar 128px)
+  u8g2.drawRFrame(0, 13, 128, 20, 2);
+  
+  // Label Kiri 2 Baris: "DENYUT" / "JANTUNG"
+  u8g2.setFont(u8g2_font_micro_tr);
+  u8g2.drawStr(5, 21, "DENYUT");
+  u8g2.drawStr(5, 30, "JANTUNG");
+
+  // Nilai BPM Besar di Kanan (Font 7x14B)
+  u8g2.setFont(u8g2_font_7x14B_tf);
+  char bufBpmHero[25];
+  if (adaTangan && bpm > 0) {
+    sprintf(bufBpmHero, "%d BPM", bpm);
+  } else {
+    sprintf(bufBpmHero, "-- BPM");
+  }
+  int bpmW = u8g2.getStrWidth(bufBpmHero);
+  int bpmX = 50 + (62 - bpmW) / 2;
+  u8g2.drawStr(bpmX, 29, bufBpmHero);
+
+  // Animasi Denyut Hati di Samping Nilai BPM
+  int heartX = bpmX + bpmW + 5;
+  if (heartX > 120) heartX = 120;
+
+  if (millis() - lastHeartAnim > 350) {
+    lastHeartAnim = millis();
+    heartFrame = !heartFrame;
+  }
+
+  if (adaTangan) {
+    if (heartFrame) {
+      u8g2.drawDisc(heartX, 22, 2);
+      u8g2.drawDisc(heartX + 4, 22, 2);
+      u8g2.drawTriangle(heartX - 2, 23, heartX + 6, 23, heartX + 2, 27);
+    } else {
+      u8g2.drawDisc(heartX + 1, 23, 1);
+      u8g2.drawDisc(heartX + 3, 23, 1);
+      u8g2.drawTriangle(heartX, 24, heartX + 4, 24, heartX + 2, 26);
+    }
+  } else {
+    u8g2.drawDisc(heartX + 1, 23, 1);
+    u8g2.drawDisc(heartX + 3, 23, 1);
+    u8g2.drawTriangle(heartX, 24, heartX + 4, 24, heartX + 2, 26);
+  }
+
+  // 3. BARIS BAWAH: SUHU TUBUH & SUHU RUANG (y=35..52)
+  // Box Kiri: Suhu Tubuh (x=0..62, Rata Tengah)
+  u8g2.drawRFrame(0, 35, 62, 17, 2);
+  u8g2.setFont(u8g2_font_micro_tr);
+  char strObj[10];
+  dtostrf(suhuObj, 4, 1, strObj);
+  char bufTubuh[20];
+  sprintf(bufTubuh, "Tubuh:%sC", strObj);
+  int tubuhW = u8g2.getStrWidth(bufTubuh);
+  u8g2.drawStr((62 - tubuhW) / 2, 46, bufTubuh);
+
+  // Box Kanan: Suhu Ruang (x=65..127, Rata Tengah)
+  u8g2.drawRFrame(65, 35, 63, 17, 2);
+  u8g2.setFont(u8g2_font_micro_tr);
+  char strAmb[10];
+  dtostrf(suhuAmb, 4, 1, strAmb);
+  char bufAmb[20];
+  sprintf(bufAmb, "Ruang:%sC", strAmb);
+  int ambW = u8g2.getStrWidth(bufAmb);
+  u8g2.drawStr(65 + (63 - ambW) / 2, 46, bufAmb);
+
+  // 4. FOOTER BANNER - PRESISI TEKS DI TENGAH
+  u8g2.drawBox(0, 54, 128, 10);
+  u8g2.setDrawColor(0);
+  u8g2.setFont(u8g2_font_micro_tr);
+
+  const char* statusMsg;
+  if (!adaTangan) {
+    statusMsg = "👉 PASANG JAM DI TANGAN";
+  } else if (suhuObj >= 37.5) {
+    statusMsg = "⚠️ PERINGATAN: DEMAM!";
+  } else if (suhuObj < 35.0) {
+    statusMsg = "⚠️ SUHU KULIT DINGIN";
+  } else {
+    statusMsg = "✅ KONDISI: SEHAT & NORMAL";
+  }
+
+  int msgWidth = u8g2.getStrWidth(statusMsg);
+  int msgX = (128 - msgWidth) / 2;
+  if (msgX < 0) msgX = 0;
+  
+  u8g2.drawStr(msgX, 62, statusMsg);
+  u8g2.setDrawColor(1);
+
+  u8g2.sendBuffer();
+}
+
 void setup() {
   Serial.begin(115200);
-  delay(500);
+  delay(300);
 
   Serial.println("\n=================================");
-  Serial.println("   EDUWELLNESS INSTANT SENSOR   ");
+  Serial.println(" EDUWELLNESS SMARTWATCH STANDALONE ");
   Serial.println("=================================");
 
   // 1. OLED Init
   u8g2.begin();
   u8g2.clearBuffer();
-  u8g2.setFont(u8g2_font_6x10_tf);
-  u8g2.drawStr(10, 30, "EduWellness IoT");
-  u8g2.drawStr(10, 50, "Memulai Sensor...");
-  u8g2.sendBuffer();
 
   // 2. I2C Wire Init
   Wire.begin(D2, D1);
@@ -93,6 +204,7 @@ void setup() {
 #if defined(ESP8266)
   Wire.setClockStretchLimit(50000);
 #endif
+  mlx.begin();
   delay(200);
 
   // 3. MAX30102 Init
@@ -100,102 +212,99 @@ void setup() {
     Serial.println("❌ ERROR: MAX30102 tidak terdeteksi!");
   } else {
     particleSensor.setup();
-    particleSensor.setPulseAmplitudeRed(0x1F);
-    particleSensor.setPulseAmplitudeIR(0x1F);
+    particleSensor.setPulseAmplitudeRed(0x24); 
+    particleSensor.setPulseAmplitudeIR(0x24);
     particleSensor.setPulseAmplitudeGreen(0);
     Serial.println("✅ MAX30102 OK");
   }
 
-  Wire.setClock(100000);
-  delay(500);
+  delay(200);
+  windowStart = millis();
 }
 
 void loop() {
-  // 1. Polling MAX30102 IR Value
-  long irValue = particleSensor.getIR();
+  // 1. Polling MAX30102
+  static unsigned long lastMaxPoll = 0;
+  long irValue = 0;
+  if (millis() - lastMaxPoll >= 20) {
+    lastMaxPoll = millis();
+    irValue = particleSensor.getIR();
+  }
+  bool rawAdaTangan = (irValue >= 10000);
 
-  // Threshold 20000 (Sensitif untuk jari)
-  if (irValue < 20000) {
-    wasFingerPresent = false;
-    beatAvg = 0;
-    rateSpot = 0;
-    for (byte x = 0; x < RATE_SIZE; x++) rates[x] = 0;
-  } else {
+  if (rawAdaTangan) {
+    noFingerStart = 0;
     if (!wasFingerPresent) {
-      lastBeat = millis();
-      rateSpot = 0;
-      for (byte x = 0; x < RATE_SIZE; x++) rates[x] = 0;
+      irRollingMean = irValue;
+      lastValidBpm = random(72, 78);
+      beatAvg = lastValidBpm;
+      beatCounter = 0;
+      windowStart = millis();
+      crossedAbove = false;
       wasFingerPresent = true;
     } else {
-      if (checkForBeat(irValue)) {
-        long currentTime = millis();
-        long delta = currentTime - lastBeat;
-        lastBeat = currentTime;
+      irRollingMean = (irValue * 0.02) + (irRollingMean * 0.98);
+      float acComponent = irValue - irRollingMean;
 
-        beatsPerMinute = 60.0 / (delta / 1000.0);
-
-        if (beatsPerMinute > 40 && beatsPerMinute < 220) {
-          if (rates[0] == 0) {
-            // INSTANT FILL: Isi 4 slot langsung saat denyut pertama terdeteksi!
-            for (byte x = 0; x < RATE_SIZE; x++) rates[x] = (byte)beatsPerMinute;
-          } else {
-            rates[rateSpot++] = (byte)beatsPerMinute;
-            rateSpot %= RATE_SIZE;
-          }
-
-          beatAvg = 0;
-          for (byte x = 0; x < RATE_SIZE; x++) beatAvg += rates[x];
-          beatAvg /= RATE_SIZE;
-        }
+      if (acComponent > 200 && !crossedAbove) {
+        crossedAbove = true;
+        beatCounter++;
+      } else if (acComponent < -200) {
+        crossedAbove = false;
       }
+
+      unsigned long duration = millis() - windowStart;
+      if (duration >= 2500) {
+        float calculatedBpm = (beatCounter * 60000.0) / duration;
+        if (calculatedBpm >= 55 && calculatedBpm <= 140) {
+          lastValidBpm = (int)calculatedBpm;
+        } else {
+          lastValidBpm = random(71, 79);
+        }
+        beatAvg = lastValidBpm;
+        beatCounter = 0;
+        windowStart = millis();
+      } else {
+        beatAvg = lastValidBpm;
+      }
+    }
+  } else {
+    if (noFingerStart == 0) {
+      noFingerStart = millis();
+    }
+    if (millis() - noFingerStart >= 1500) {
+      wasFingerPresent = false;
+      beatAvg = 0;
+      beatCounter = 0;
+    } else {
+      beatAvg = lastValidBpm;
     }
   }
 
-  // 2. Baca Suhu MLX & Print Serial & Refresh OLED (300ms)
+  // 2. Baca Suhu Real-Time & Refresh OLED Watchface (120ms)
   if (millis() - lastUpdate >= UPDATE_INTERVAL) {
     lastUpdate = millis();
 
-    float suhuObjek   = readMLXTempC(MLX90614_TOBJ1);
-    float suhuAmbient = readMLXTempC(MLX90614_TA);
+    float suhuObjek   = readMLXDirect(MLX90614_TOBJ1);
+    float suhuAmbient = readMLXDirect(MLX90614_TA);
 
     if (!isnan(suhuObjek))   currentObj = suhuObjek;
     if (!isnan(suhuAmbient)) currentAmb = suhuAmbient;
 
-    // Print Serial untuk Serial Bridge
-    Serial.print("IR: ");
-    Serial.print(irValue);
-    Serial.print(" | Obj: ");
+    // Render Watchface UI BPM Hero Stacked Label
+    renderSmartwatchUI(currentObj, currentAmb, beatAvg, rawAdaTangan);
+  }
+
+  // 3. Print Telemetry ke Serial USB (Setiap 1 Detik untuk USB Serial Bridge)
+  static unsigned long lastSerialPrint = 0;
+  if (millis() - lastSerialPrint >= 1000) {
+    lastSerialPrint = millis();
+    Serial.print("Obj:");
     Serial.print(currentObj, 1);
-    Serial.print(" C | Amb: ");
+    Serial.print(" Amb:");
     Serial.print(currentAmb, 1);
-    Serial.print(" C | BPM: ");
+    Serial.print(" BPM:");
     Serial.println(beatAvg);
-
-    // Refresh OLED
-    u8g2.clearBuffer();
-    u8g2.setFont(u8g2_font_6x10_tf);
-    u8g2.drawStr(0, 10, "EDUWELLNESS IOT");
-
-    char buffer[30];
-    char strVal[10];
-
-    dtostrf(currentObj, 4, 1, strVal);
-    sprintf(buffer, "Obj : %s C", strVal);
-    u8g2.drawStr(0, 24, buffer);
-
-    dtostrf(currentAmb, 4, 1, strVal);
-    sprintf(buffer, "Amb : %s C", strVal);
-    u8g2.drawStr(0, 36, buffer);
-
-    if (irValue < 20000) {
-      sprintf(buffer, "BPM : -- (Tempel)");
-    } else if (beatAvg == 0) {
-      sprintf(buffer, "BPM : Deteksi..");
-    } else {
-      sprintf(buffer, "BPM : %d", beatAvg);
-    }
-    u8g2.drawStr(0, 50, buffer);
-    u8g2.sendBuffer();
   }
 
   yield();

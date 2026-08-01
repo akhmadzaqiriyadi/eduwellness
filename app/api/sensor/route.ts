@@ -6,15 +6,17 @@ export const dynamic = 'force-dynamic';
 // GET: Live Dashboard reads latest sensor data + Wi-Fi status
 export async function GET() {
   const lastUpdatedTime = new Date(globalLiveState.updatedAt).getTime();
-  const secondsAgo = Math.floor((Date.now() - lastUpdatedTime) / 1000);
+  const isInitialState = lastUpdatedTime === 0;
+  const secondsAgo = isInitialState ? 0 : Math.floor((Date.now() - lastUpdatedTime) / 1000);
   
-  // Device is connected if data received within 10 seconds (gives buffer for HTTPS/SSL latency & Vercel cold starts)
-  const isWifiConnected = secondsAgo < 10;
+  // Device is connected if data received within 30 seconds
+  const isWifiConnected = !isInitialState && secondsAgo < 30;
 
   return NextResponse.json({
     ...globalLiveState,
     isWifiConnected,
     secondsAgo,
+    isInitialState,
   });
 }
 
@@ -28,8 +30,8 @@ export async function POST(request: Request) {
         suhuObjek: body.suhuObjek,
         suhuAmbient: body.suhuAmbient || 30.0,
         bpm: body.bpm || 0,
-        deviceId: body.deviceId || 'WEMOS-D1-UTY',
-        wifiSsid: body.wifiSsid || 'UTY-Network',
+        deviceId: body.deviceId || 'WEMOS-D1-SMPN1SEYEGAN',
+        wifiSsid: body.wifiSsid || 'Eduwellness',
       });
       return NextResponse.json({ success: true, message: 'Data sensor diperbarui' });
     }
