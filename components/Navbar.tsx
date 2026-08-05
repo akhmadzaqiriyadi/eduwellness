@@ -23,11 +23,11 @@ export default function Navbar() {
 
   const navLinks = [
     { href: '/', label: 'Beranda' },
+    { href: '/about', label: 'About Us' },
     { href: '/edukasi', label: 'Edukasi Kesehatan' },
     { href: '/dashboard', label: 'Status Live' },
     { href: '/rekomendasi', label: 'Rekomendasi' },
     { href: '/riwayat', label: 'Riwayat' },
-    { href: '/about', label: 'About Us' },
   ];
 
   return (
