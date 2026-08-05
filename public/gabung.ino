@@ -2,6 +2,8 @@
 #include "MAX30105.h"
 #include <U8g2lib.h>
 #include <Adafruit_MLX90614.h>
+#include <time.h>
+#include <sys/time.h>
 
 //====================================================
 // SENSOR & DISPLAY OBJECTS (OLED 1.3 INCH STANDALONE)
@@ -39,21 +41,41 @@ float currentAmb = 29.5;
 bool heartFrame = false;
 unsigned long lastHeartAnim = 0;
 
-// Offsets Jam Lokal WIB (14:10)
-unsigned long bootTimeOffset = 14 * 3600 + 10 * 60;
+//====================================================
+// OTOMATIS RECEIVE TIME VIA SERIAL USB (POSIX SETTIMEOFDAY)
+//====================================================
+void processSerialCommands() {
+  while (Serial.available() > 0) {
+    String input = Serial.readStringUntil('\n');
+    input.trim();
+    if (input.startsWith("TIME:")) {
+      unsigned long epoch = input.substring(5).toInt();
+      if (epoch > 1000000000UL) {
+        struct timeval tv = { (time_t)epoch, 0 };
+        settimeofday(&tv, NULL);
+      }
+    }
+  }
+}
 
 //====================================================
-// HELPER JAM SMARTWATCH (WIB TICKER)
+// HELPER JAM SMARTWATCH (STANDARD POSIX C TIME.H)
 //====================================================
 void getSmartwatchTime(char* timeBuf) {
-  unsigned long currentSecs = bootTimeOffset + (millis() / 1000);
-  int hrs = (currentSecs / 3600) % 24;
-  int mins = (currentSecs / 60) % 60;
-  int secs = currentSecs % 60;
-  if (secs % 2 == 0) {
-    sprintf(timeBuf, "%02d:%02d", hrs, mins);
+  time_t now;
+  struct tm timeinfo;
+  time(&now);
+  localtime_r(&now, &timeinfo);
+
+  if (timeinfo.tm_year >= (2020 - 1900)) {
+    int secs = timeinfo.tm_sec;
+    if (secs % 2 == 0) {
+      sprintf(timeBuf, "%02d:%02d", timeinfo.tm_hour, timeinfo.tm_min);
+    } else {
+      sprintf(timeBuf, "%02d %02d", timeinfo.tm_hour, timeinfo.tm_min);
+    }
   } else {
-    sprintf(timeBuf, "%02d %02d", hrs, mins);
+    sprintf(timeBuf, "--:--");
   }
 }
 
@@ -140,7 +162,6 @@ void renderSmartwatchUI(float suhuObj, float suhuAmb, int bpm, bool adaTangan) {
   }
 
   // 3. BARIS BAWAH: SUHU TUBUH & SUHU RUANG (y=35..52)
-  // Box Kiri: Suhu Tubuh (x=0..62, Rata Tengah)
   u8g2.drawRFrame(0, 35, 62, 17, 2);
   u8g2.setFont(u8g2_font_micro_tr);
   char strObj[10];
@@ -150,7 +171,6 @@ void renderSmartwatchUI(float suhuObj, float suhuAmb, int bpm, bool adaTangan) {
   int tubuhW = u8g2.getStrWidth(bufTubuh);
   u8g2.drawStr((62 - tubuhW) / 2, 46, bufTubuh);
 
-  // Box Kanan: Suhu Ruang (x=65..127, Rata Tengah)
   u8g2.drawRFrame(65, 35, 63, 17, 2);
   u8g2.setFont(u8g2_font_micro_tr);
   char strAmb[10];
@@ -160,7 +180,7 @@ void renderSmartwatchUI(float suhuObj, float suhuAmb, int bpm, bool adaTangan) {
   int ambW = u8g2.getStrWidth(bufAmb);
   u8g2.drawStr(65 + (63 - ambW) / 2, 46, bufAmb);
 
-  // 4. FOOTER BANNER - PRESISI TEKS DI TENGAH
+  // 4. FOOTER STATUS BANNER
   u8g2.drawBox(0, 54, 128, 10);
   u8g2.setDrawColor(0);
   u8g2.setFont(u8g2_font_micro_tr);
@@ -223,6 +243,9 @@ void setup() {
 }
 
 void loop() {
+  // 0. Auto-Sync Jam via Serial USB Command (TIME:<epoch>)
+  processSerialCommands();
+
   // 1. Polling MAX30102
   static unsigned long lastMaxPoll = 0;
   long irValue = 0;
@@ -291,7 +314,6 @@ void loop() {
     if (!isnan(suhuObjek))   currentObj = suhuObjek;
     if (!isnan(suhuAmbient)) currentAmb = suhuAmbient;
 
-    // Render Watchface UI BPM Hero Stacked Label
     renderSmartwatchUI(currentObj, currentAmb, beatAvg, rawAdaTangan);
   }
 

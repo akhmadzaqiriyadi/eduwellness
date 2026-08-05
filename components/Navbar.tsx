@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { LogOut, Heart, Sparkles, ShieldCheck, Activity, Clock, BookOpen, Crown } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -22,11 +23,11 @@ export default function Navbar() {
 
   const navLinks = [
     { href: '/', label: 'Beranda' },
-    { href: '/edukasi', label: 'Edukasi' },
-    { href: '/phbs', label: 'PHBS' },
+    { href: '/edukasi', label: 'Edukasi Kesehatan' },
     { href: '/dashboard', label: 'Status Live' },
     { href: '/rekomendasi', label: 'Rekomendasi' },
     { href: '/riwayat', label: 'Riwayat' },
+    { href: '/about', label: 'About Us' },
   ];
 
   return (
@@ -36,15 +37,19 @@ export default function Navbar() {
           
           {/* LOGO */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-2xl bg-sky-500 flex items-center justify-center text-white shadow-md shadow-sky-500/25 group-hover:scale-105 transition-transform">
-              <Heart className="w-5 h-5 fill-white" />
-            </div>
+            <Image
+              src="/logoeduwellnesss.png"
+              alt="EduWellness Logo"
+              width={40}
+              height={40}
+              className="w-10 h-10 object-contain group-hover:scale-105 transition-transform drop-shadow-sm"
+            />
             <div className="flex flex-col">
               <span className="text-xl font-extrabold tracking-tight text-slate-900 flex items-center gap-1">
                 Edu<span className="text-sky-500">Wellness</span>
               </span>
               <span className="text-[10px] font-bold text-sky-600 tracking-wider uppercase -mt-1">
-                IoT Health Education
+                IoT & Literasi Kesehatan Siswa
               </span>
             </div>
           </Link>

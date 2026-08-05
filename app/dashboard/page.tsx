@@ -227,7 +227,7 @@ export default function DashboardPage() {
   };
 
   const getBpmStatus = () => {
-    if (bpm === 0) return { text: 'Menunggu Jari...', color: 'text-slate-500 bg-slate-100 border-slate-200' };
+    if (bpm === 0) return { text: 'Tempelkan sensor di pergelangan tangan', color: 'text-slate-500 bg-slate-100 border-slate-200' };
     if (bpm > 100) return { text: 'Tinggi (Takikardia) ⚠️', color: 'text-rose-700 bg-rose-50 border-rose-200' };
     if (bpm < 50) return { text: 'Rendah (Bradikardia) ⚠️', color: 'text-amber-700 bg-amber-50 border-amber-200' };
     return { text: 'Normal ✅', color: 'text-emerald-700 bg-emerald-50 border-emerald-200' };
@@ -313,7 +313,7 @@ export default function DashboardPage() {
                   Mengukur Kesehatan... Menyimpan Otomatis dalam {countdown} detik ⏳
                 </h4>
                 <p className="text-xs text-sky-100 font-medium mt-0.5">
-                  Tahan jarimu di sensor. Hasil pengecekan akan otomatis masuk ke Riwayat.
+                  Tempelkan sensor di pergelangan tangan. Hasil pengecekan akan otomatis masuk ke Riwayat.
                 </p>
               </div>
             </div>
@@ -394,7 +394,7 @@ export default function DashboardPage() {
           <div className="pt-3 border-t border-rose-100 flex items-center justify-between text-xs text-slate-500 font-medium">
             <span>Status Pengukuran:</span>
             <span className="font-bold text-slate-900">
-              {bpm > 0 ? 'Deteksi Denyut Aktif ✅' : 'Tempelkan Jari di Sensor 🖐️'}
+              {bpm > 0 ? 'Deteksi Denyut Aktif ✅' : 'Tempelkan sensor di pergelangan tangan 🖐️'}
             </span>
           </div>
         </div>

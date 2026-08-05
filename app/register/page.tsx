@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Mail, Lock, User, UserPlus, CheckCircle2, AlertCircle, Sparkles, Heart } from 'lucide-react';
+import { Mail, Lock, User, UserPlus, CheckCircle2, AlertCircle, Sparkles, Heart, School, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { saveSession } from '@/lib/auth';
 import CustomSelect from '@/components/CustomSelect';
@@ -13,7 +14,9 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [grade, setGrade] = useState('Kelas 10');
+  const [showPassword, setShowPassword] = useState(false);
+  const [school, setSchool] = useState('SMP N 1 SEYEGAN');
+  const [grade, setGrade] = useState('Kelas VII');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -32,6 +35,7 @@ export default function RegisterPage() {
           options: {
             data: {
               full_name: fullName,
+              school: school,
               grade: grade,
             },
           },
@@ -63,6 +67,13 @@ export default function RegisterPage() {
         
         {/* Header */}
         <div className="text-center space-y-2">
+          <Image
+            src="/logoeduwellnesss.png"
+            alt="EduWellness Logo"
+            width={48}
+            height={48}
+            className="w-12 h-12 object-contain mx-auto drop-shadow-sm"
+          />
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-100 text-sky-700 text-[11px] font-extrabold">
             <Sparkles className="w-3.5 h-3.5 text-sky-500" />
             <span>EduWellness Gen Z Community</span>
@@ -118,34 +129,70 @@ export default function RegisterPage() {
             </div>
           </div>
 
+          {/* ASAL SEKOLAH (OTOMATIS) */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">Kelas / Tingkat</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">Asal Sekolah (Otomatis)</label>
+            <div className="relative">
+              <School className="w-4 h-4 text-sky-500 absolute left-3.5 top-3.5" />
+              <input
+                type="text"
+                value={school}
+                onChange={(e) => setSchool(e.target.value)}
+                readOnly
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-sky-50/60 border border-sky-100 text-sm text-slate-900 font-extrabold focus:outline-none cursor-default"
+              />
+            </div>
+          </div>
+
+          {/* KELAS SMP (VII, VIII, IX) */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">Kelas</label>
             <CustomSelect
               options={[
-                { value: 'Kelas 10', label: 'Kelas 10 (SMA/SMK)' },
-                { value: 'Kelas 11', label: 'Kelas 11 (SMA/SMK)' },
-                { value: 'Kelas 12', label: 'Kelas 12 (SMA/SMK)' },
-                { value: 'SMP', label: 'SMP / Sederajat' },
-                { value: 'Umum', label: 'Umum / Lainnya' },
+                { value: 'Kelas VII', label: 'Kelas VII (Tujuh)' },
+                { value: 'Kelas VIII', label: 'Kelas VIII (Delapan)' },
+                { value: 'Kelas IX', label: 'Kelas IX (Sembilan)' },
               ]}
               value={grade}
               onChange={setGrade}
             />
           </div>
 
+          {/* KATA SANDI + SHOW PASSWORD TOGGLE */}
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1.5">Kata Sandi</label>
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Minimal 6 karakter"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-sky-100 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:bg-white transition-all"
+                className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 border border-sky-100 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:bg-white transition-all"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 p-0.5 rounded-md transition-colors"
+                title={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4 text-sky-600" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+            
+            <div className="flex items-center gap-2 mt-2">
+              <input
+                type="checkbox"
+                id="showPasswordCheckbox"
+                checked={showPassword}
+                onChange={(e) => setShowPassword(e.target.checked)}
+                className="w-3.5 h-3.5 rounded text-sky-500 border-slate-300 focus:ring-sky-500 cursor-pointer"
+              />
+              <label htmlFor="showPasswordCheckbox" className="text-xs text-slate-600 font-semibold cursor-pointer select-none">
+                Tampilkan Kata Sandi
+              </label>
             </div>
           </div>
 

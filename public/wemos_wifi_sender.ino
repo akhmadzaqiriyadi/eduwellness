@@ -6,6 +6,7 @@
 #include <U8g2lib.h>
 #include <Adafruit_MLX90614.h>
 #include <time.h>
+#include <sys/time.h>
 
 //====================================================
 // WIFI & VERCEL SERVER CONFIGURATION
@@ -56,32 +57,41 @@ float currentAmb = 29.5;
 bool heartFrame = false;
 unsigned long lastHeartAnim = 0;
 
-// Offsets Jam Lokal WIB (14:10)
-unsigned long bootTimeOffset = 14 * 3600 + 10 * 60;
+//====================================================
+// OTOMATIS RECEIVE TIME VIA SERIAL USB (POSIX SETTIMEOFDAY)
+//====================================================
+void processSerialCommands() {
+  while (Serial.available() > 0) {
+    String input = Serial.readStringUntil('\n');
+    input.trim();
+    if (input.startsWith("TIME:")) {
+      unsigned long epoch = input.substring(5).toInt();
+      if (epoch > 1000000000UL) {
+        struct timeval tv = { (time_t)epoch, 0 };
+        settimeofday(&tv, NULL);
+      }
+    }
+  }
+}
 
 //====================================================
-// HELPER JAM SMARTWATCH (NTP REAL-TIME / WIB TICKER)
+// HELPER JAM SMARTWATCH (STANDARD POSIX C TIME.H)
 //====================================================
 void getSmartwatchTime(char* timeBuf) {
-  time_t now = time(nullptr);
-  if (now > 1000000000UL) {
-    struct tm* timeinfo = localtime(&now);
-    int secs = timeinfo->tm_sec;
+  time_t now;
+  struct tm timeinfo;
+  time(&now);
+  localtime_r(&now, &timeinfo);
+
+  if (timeinfo.tm_year >= (2020 - 1900)) {
+    int secs = timeinfo.tm_sec;
     if (secs % 2 == 0) {
-      sprintf(timeBuf, "%02d:%02d", timeinfo->tm_hour, timeinfo->tm_min);
+      sprintf(timeBuf, "%02d:%02d", timeinfo.tm_hour, timeinfo.tm_min);
     } else {
-      sprintf(timeBuf, "%02d %02d", timeinfo->tm_hour, timeinfo->tm_min);
+      sprintf(timeBuf, "%02d %02d", timeinfo.tm_hour, timeinfo.tm_min);
     }
   } else {
-    unsigned long currentSecs = bootTimeOffset + (millis() / 1000);
-    int hrs = (currentSecs / 3600) % 24;
-    int mins = (currentSecs / 60) % 60;
-    int secs = currentSecs % 60;
-    if (secs % 2 == 0) {
-      sprintf(timeBuf, "%02d:%02d", hrs, mins);
-    } else {
-      sprintf(timeBuf, "%02d %02d", hrs, mins);
-    }
+    sprintf(timeBuf, "--:--");
   }
 }
 
@@ -161,7 +171,7 @@ void renderSmartwatchUI(float suhuObj, float suhuAmb, int bpm, bool adaTangan, b
   // 2. KARTU UTAMA HERO: BPM JANTUNG (y=13..33, Lebar 128px)
   u8g2.drawRFrame(0, 13, 128, 20, 2);
   
-  // Label Kiri 2 Baris: "DENYUT" / "JANTUNG" (Tidak mungkin tabrakan!)
+  // Label Kiri 2 Baris: "DENYUT" / "JANTUNG"
   u8g2.setFont(u8g2_font_micro_tr);
   u8g2.drawStr(5, 21, "DENYUT");
   u8g2.drawStr(5, 30, "JANTUNG");
@@ -175,7 +185,7 @@ void renderSmartwatchUI(float suhuObj, float suhuAmb, int bpm, bool adaTangan, b
     sprintf(bufBpmHero, "-- BPM");
   }
   int bpmW = u8g2.getStrWidth(bufBpmHero);
-  int bpmX = 50 + (62 - bpmW) / 2; // Position in right section
+  int bpmX = 50 + (62 - bpmW) / 2;
   u8g2.drawStr(bpmX, 29, bufBpmHero);
 
   // Animasi Denyut Hati di Samping Nilai BPM
@@ -204,7 +214,6 @@ void renderSmartwatchUI(float suhuObj, float suhuAmb, int bpm, bool adaTangan, b
   }
 
   // 3. BARIS BAWAH: SUHU TUBUH & SUHU RUANG (y=35..52)
-  // Box Kiri: Suhu Tubuh (x=0..62, Rata Tengah)
   u8g2.drawRFrame(0, 35, 62, 17, 2);
   u8g2.setFont(u8g2_font_micro_tr);
   char strObj[10];
@@ -214,7 +223,6 @@ void renderSmartwatchUI(float suhuObj, float suhuAmb, int bpm, bool adaTangan, b
   int tubuhW = u8g2.getStrWidth(bufTubuh);
   u8g2.drawStr((62 - tubuhW) / 2, 46, bufTubuh);
 
-  // Box Kanan: Suhu Ruang (x=65..127, Rata Tengah)
   u8g2.drawRFrame(65, 35, 63, 17, 2);
   u8g2.setFont(u8g2_font_micro_tr);
   char strAmb[10];
@@ -224,7 +232,7 @@ void renderSmartwatchUI(float suhuObj, float suhuAmb, int bpm, bool adaTangan, b
   int ambW = u8g2.getStrWidth(bufAmb);
   u8g2.drawStr(65 + (63 - ambW) / 2, 46, bufAmb);
 
-  // 4. FOOTER STATUS BANNER - FULL CENTERED
+  // 4. FOOTER STATUS BANNER
   u8g2.drawBox(0, 54, 128, 10);
   u8g2.setDrawColor(0);
   u8g2.setFont(u8g2_font_micro_tr);
@@ -266,7 +274,9 @@ void setup() {
   u8g2.drawStr(10, 40, "Menghubungkan WiFi..");
   u8g2.sendBuffer();
 
-  // 2. Connect WiFi & Setup NTP Real-time Clock (WIB UTC+7)
+  // 2. Connect WiFi & Setup Standard POSIX NTP Clock (WIB UTC+7)
+  configTime(7 * 3600, 0, "pool.ntp.org", "time.nist.gov", "id.pool.ntp.org");
+
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("Menghubungkan WiFi");
   int wifiRetries = 0;
@@ -278,13 +288,12 @@ void setup() {
 
   if (WiFi.status() == WL_CONNECTED) {
     Serial.println("\n✅ WiFi Terhubung! IP: " + WiFi.localIP().toString());
-    configTime(7 * 3600, 0, "pool.ntp.org", "time.nist.gov");
   } else {
-    Serial.println("\n⚠️ WiFi Timeout - Mode Serial Aktif.");
+    Serial.println("\n⚠️ WiFi Timeout - Auto Serial / Standby Time Active.");
   }
 
   // 3. I2C Wire Init
-  Wire.begin(D2, D1); // SDA=D2=GPIO4, SCL=D1=GPIO5
+  Wire.begin(D2, D1);
   Wire.setClock(100000);
 #if defined(ESP8266)
   Wire.setClockStretchLimit(50000);
@@ -308,6 +317,9 @@ void setup() {
 }
 
 void loop() {
+  // 0. Auto-Sync Jam via Serial USB Command (TIME:<epoch>)
+  processSerialCommands();
+
   // 1. Polling MAX30102
   static unsigned long lastMaxPoll = 0;
   long irValue = 0;
@@ -376,7 +388,6 @@ void loop() {
     if (!isnan(suhuObjek))   currentObj = suhuObjek;
     if (!isnan(suhuAmbient)) currentAmb = suhuAmbient;
 
-    // Render Watchface UI BPM Hero Stacked Label
     bool isOnline = (WiFi.status() == WL_CONNECTED);
     renderSmartwatchUI(currentObj, currentAmb, beatAvg, rawAdaTangan, isOnline);
   }

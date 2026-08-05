@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Activity, Mail, Lock, LogIn, Sparkles, CheckCircle2, AlertCircle, Heart, Crown, UserCheck } from 'lucide-react';
+import { Activity, Mail, Lock, LogIn, Sparkles, CheckCircle2, AlertCircle, Heart, Crown, UserCheck, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { saveSession, UserRole } from '@/lib/auth';
 
@@ -11,6 +12,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<UserRole>('user');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -82,9 +84,13 @@ export default function LoginPage() {
         
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-sky-500 flex items-center justify-center text-white mx-auto shadow-md shadow-sky-500/25">
-            <Heart className="w-6 h-6 fill-white" />
-          </div>
+          <Image
+            src="/logoeduwellnesss.png"
+            alt="EduWellness Logo"
+            width={48}
+            height={48}
+            className="w-12 h-12 object-contain mx-auto drop-shadow-sm"
+          />
           <h2 className="text-2xl font-extrabold text-slate-900">Masuk ke EduWellness</h2>
           <p className="text-xs text-slate-500">Masuk sebagai Siswa atau Admin Pengelola Kesehatan</p>
         </div>
@@ -172,13 +178,34 @@ export default function LoginPage() {
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-sky-100 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:bg-white transition-all"
+                className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 border border-sky-100 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:bg-white transition-all"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 p-0.5 rounded-md transition-colors"
+                title={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4 text-sky-600" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 mt-2">
+              <input
+                type="checkbox"
+                id="showLoginPasswordCheckbox"
+                checked={showPassword}
+                onChange={(e) => setShowPassword(e.target.checked)}
+                className="w-3.5 h-3.5 rounded text-sky-500 border-slate-300 focus:ring-sky-500 cursor-pointer"
+              />
+              <label htmlFor="showLoginPasswordCheckbox" className="text-xs text-slate-600 font-semibold cursor-pointer select-none">
+                Tampilkan Kata Sandi
+              </label>
             </div>
           </div>
 

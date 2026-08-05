@@ -14,16 +14,16 @@ export default function HomePage() {
           <div className="lg:col-span-7 space-y-6 text-left">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-100 text-sky-700 text-xs font-extrabold">
               <Sparkles className="w-3.5 h-3.5 text-sky-500" />
-              <span>IoT Health Education Platform</span>
+              <span>Aplikasi Web Berbasis IoT Terintegrasi</span>
             </div>
 
-            <h1 className="text-4xl sm:text-6xl font-black text-slate-900 leading-[1.15] tracking-tight">
-              Hidup Sehat <br />
-              <span className="text-gradient">Dimulai dari Sini</span>
+            <h1 className="text-3xl sm:text-5xl font-black text-slate-900 leading-[1.18] tracking-tight">
+              Sensor Suhu & Detak Jantung <br />
+              <span className="text-gradient">Literasi Kesehatan Siswa</span>
             </h1>
 
             <p className="text-slate-600 text-base sm:text-lg max-w-xl leading-relaxed font-normal">
-              Platform IoT yang memantau suhu & detak jantungmu secara real-time, plus edukasi kesehatan yang seru dan Gen Z banget!
+              EduWellness: Pengembangan Aplikasi Web Berbasis IoT Terintegrasi Sensor Suhu dan Detak Jantung untuk Menumbuhkan Literasi Kesehatan serta Kebiasaan Hidup Sehat bagi Siswa.
             </p>
 
             <div className="flex flex-wrap items-center gap-4 pt-4">

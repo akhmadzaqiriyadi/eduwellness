@@ -1,7 +1,44 @@
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Heart } from 'lucide-react';
+import Image from 'next/image';
 
 export default function Footer() {
+  const [isWifiConnected, setIsWifiConnected] = useState<boolean>(false);
+  const [deviceId, setDeviceId] = useState<string>('WEMOS-D1-UTY');
+  const offlineCounterRef = useRef<number>(0);
+
+  useEffect(() => {
+    const checkSensorStatus = async () => {
+      try {
+        const res = await fetch('/api/sensor', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.isWifiConnected) {
+            offlineCounterRef.current = 0;
+            setIsWifiConnected(true);
+            if (data.deviceId) setDeviceId(data.deviceId);
+            return;
+          }
+        }
+        offlineCounterRef.current += 1;
+        if (offlineCounterRef.current >= 2) {
+          setIsWifiConnected(false);
+        }
+      } catch (err) {
+        offlineCounterRef.current += 1;
+        if (offlineCounterRef.current >= 2) {
+          setIsWifiConnected(false);
+        }
+      }
+    };
+
+    checkSensorStatus();
+    const interval = setInterval(checkSensorStatus, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <footer className="bg-white border-t border-sky-100 text-slate-600 mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -9,13 +46,17 @@ export default function Footer() {
           
           <div className="space-y-3 md:col-span-1">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-sky-500 flex items-center justify-center text-white">
-                <Heart className="w-4 h-4 fill-white" />
-              </div>
+              <Image
+                src="/logoeduwellnesss.png"
+                alt="EduWellness Logo"
+                width={32}
+                height={32}
+                className="w-8 h-8 object-contain"
+              />
               <span className="text-lg font-extrabold text-slate-900">EduWellness</span>
             </div>
             <p className="text-xs text-slate-500 leading-relaxed">
-              Platform IoT literasi kesehatan terintegrasi untuk siswa Indonesia. Memantau suhu & detak jantung real-time!
+              EduWellness: Pengembangan Aplikasi Web Berbasis IoT Terintegrasi Sensor Suhu dan Detak Jantung untuk Menumbuhkan Literasi Kesehatan serta Kebiasaan Hidup Sehat bagi Siswa.
             </p>
           </div>
 
@@ -26,8 +67,8 @@ export default function Footer() {
               <li><Link href="/dashboard" className="hover:text-sky-600">IoT Live Dashboard</Link></li>
               <li><Link href="/rekomendasi" className="hover:text-sky-600">Rekomendasi Kesehatan</Link></li>
               <li><Link href="/riwayat" className="hover:text-sky-600">Riwayat Pengecekan</Link></li>
-              <li><Link href="/edukasi" className="hover:text-sky-600">Health Education Hub</Link></li>
-              <li><Link href="/phbs" className="hover:text-sky-600">10 Kebiasaan PHBS</Link></li>
+              <li><Link href="/edukasi" className="hover:text-sky-600 font-bold text-sky-600">Edukasi Kesehatan</Link></li>
+              <li><Link href="/about" className="hover:text-sky-600">About Us (Tentang Aplikasi)</Link></li>
             </ul>
           </div>
 
@@ -37,18 +78,27 @@ export default function Footer() {
               <li><Link href="/edukasi#rokok" className="hover:text-sky-600">Bahaya Rokok</Link></li>
               <li><Link href="/edukasi#menstruasi" className="hover:text-sky-600">Kesehatan Menstruasi</Link></li>
               <li><Link href="/edukasi#pola-makan" className="hover:text-sky-600">Pola Makan Sehat</Link></li>
-              <li><Link href="/phbs" className="hover:text-sky-600">10 Kebiasaan PHBS</Link></li>
+              <li><Link href="/edukasi#phbs" className="hover:text-sky-600">10 Kebiasaan PHBS</Link></li>
             </ul>
           </div>
 
+          {/* REAL-TIME DYNAMIC IOT STATUS WIDGET */}
           <div>
             <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider mb-3">IoT Status</h4>
-            <div className="p-4 rounded-2xl bg-sky-50 border border-sky-100 space-y-2">
-              <div className="flex items-center gap-2 text-xs font-bold text-sky-700">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                Wemos D1 Connected
+            <div className={`p-4 rounded-2xl border space-y-2 transition-all ${
+              isWifiConnected 
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800' 
+                : 'bg-rose-50 border-rose-200 text-rose-800'
+            }`}>
+              <div className="flex items-center gap-2 text-xs font-extrabold">
+                <span className={`w-2.5 h-2.5 rounded-full ${
+                  isWifiConnected ? 'bg-emerald-500 animate-ping' : 'bg-rose-500'
+                }`}></span>
+                <span>{isWifiConnected ? `${deviceId} Connected` : 'Perangkat IoT Offline'}</span>
               </div>
-              <p className="text-[11px] text-slate-500">MLX90614 & MAX30102 Ready</p>
+              <p className="text-[11px] font-medium opacity-80">
+                {isWifiConnected ? 'MLX90614 & MAX30102 Online ✅' : 'Standby / Menunggu Koneksi Wi-Fi 🔴'}
+              </p>
             </div>
           </div>
 
