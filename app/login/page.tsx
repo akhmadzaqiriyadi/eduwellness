@@ -68,7 +68,20 @@ export default function LoginPage() {
             console.warn('Supabase Auth login/signup notice:', signUpErr.message);
           }
         }
+
+        // Always sync user to public.users table in Supabase DB
+        try {
+          await supabase.from('users').upsert([{
+            email: email,
+            full_name: email.split('@')[0],
+            role: 'user',
+            created_at: new Date().toISOString(),
+          }], { onConflict: 'email' });
+        } catch (dbErr) {
+          console.warn('Supabase public.users sync notice:', dbErr);
+        }
       }
+
 
       const activeRole: UserRole = isLoginAdmin ? 'admin' : 'user';
       saveSession(email, activeRole);

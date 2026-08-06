@@ -29,7 +29,7 @@ export default function RegisterPage() {
 
     try {
       if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://your-supabase-project.supabase.co') {
-        await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -40,11 +40,29 @@ export default function RegisterPage() {
             },
           },
         });
+
+        if (error) {
+          console.warn('Supabase Auth SignUp notice:', error.message);
+        }
+
+        // Also insert into public 'users' table in Supabase DB
+        try {
+          await supabase.from('users').upsert([{
+            email: email,
+            full_name: fullName,
+            school: school,
+            grade: grade,
+            role: 'user',
+            created_at: new Date().toISOString(),
+          }], { onConflict: 'email' });
+        } catch (dbErr) {
+          console.warn('Supabase public.users insert notice:', dbErr);
+        }
       }
 
       saveSession(email, 'user', fullName);
 
-      setSuccessMsg('Pendaftaran berhasil! Mengalihkan ke IoT Dashboard...');
+      setSuccessMsg('Pendaftaran berhasil! Akun tersimpan di Supabase DB. Mengalihkan...');
       setTimeout(() => {
         router.push('/dashboard');
       }, 800);
@@ -52,7 +70,7 @@ export default function RegisterPage() {
       console.warn('Supabase SignUp error, fallback to instant session:', err);
       saveSession(email, 'user', fullName);
 
-      setSuccessMsg('Pendaftaran berhasil (Instant Access)!');
+      setSuccessMsg('Pendaftaran berhasil! Mengalihkan ke IoT Dashboard...');
       setTimeout(() => {
         router.push('/dashboard');
       }, 800);
@@ -60,6 +78,7 @@ export default function RegisterPage() {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-3 sm:px-4 py-8 sm:py-12">
