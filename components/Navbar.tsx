@@ -34,9 +34,9 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-sky-100/90 shadow-xs transition-all">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-sky-100/90 shadow-xs transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20">
+        <div className="flex items-center justify-between h-16 sm:h-18">
           
           {/* LOGO */}
           <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0" onClick={() => setIsMobileMenuOpen(false)}>
@@ -149,10 +149,10 @@ export default function Navbar() {
       {isMobileMenuOpen && (
         <>
           <div 
-            className="fixed inset-0 top-[65px] bg-slate-900/30 backdrop-blur-xs z-40 lg:hidden"
+            className="fixed inset-0 top-full bg-slate-900/30 backdrop-blur-xs z-40 lg:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          <div className="absolute top-full left-0 right-0 bg-white/95 backdrop-blur-xl border-b border-sky-100 p-4 shadow-xl z-50 lg:hidden animate-fadeIn space-y-4">
+          <div className="absolute top-full left-0 right-0 bg-white/95 backdrop-blur-xl border-b border-sky-100 px-4 pb-5 pt-2 shadow-xl z-50 lg:hidden animate-fadeIn space-y-3">
             
             <nav className="flex flex-col space-y-1">
               {navLinks.map((link) => {
@@ -163,7 +163,7 @@ export default function Navbar() {
                     key={link.href}
                     href={link.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all ${
+                    className={`flex items-center gap-3 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all ${
                       isActive
                         ? 'bg-sky-500 text-white shadow-md shadow-sky-500/25'
                         : 'text-slate-700 hover:bg-sky-50 hover:text-sky-600'
@@ -176,7 +176,7 @@ export default function Navbar() {
               })}
             </nav>
 
-            <div className="pt-3 border-t border-sky-100">
+            <div className="pt-2.5 border-t border-sky-100">
               {session ? (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200">
@@ -192,24 +192,24 @@ export default function Navbar() {
 
                   <button
                     onClick={handleLogout}
-                    className="w-full py-3 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-extrabold text-xs flex items-center justify-center gap-2 transition-all shadow-xs"
+                    className="w-full py-2.5 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-extrabold text-xs flex items-center justify-center gap-2 transition-all shadow-xs"
                   >
                     <LogOut className="w-4 h-4" /> Keluar dari Akun
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2 pt-1">
                   <Link
                     href="/login"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs text-center flex items-center justify-center gap-1.5 transition-all"
+                    className="py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs text-center flex items-center justify-center gap-1.5 transition-all"
                   >
                     <LogIn className="w-4 h-4 text-sky-600" /> Masuk
                   </Link>
                   <Link
                     href="/register"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="py-3 rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-xs text-center flex items-center justify-center gap-1.5 shadow-md shadow-sky-500/25 transition-all"
+                    className="py-2.5 rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-xs text-center flex items-center justify-center gap-1.5 shadow-md shadow-sky-500/25 transition-all"
                   >
                     <UserPlus className="w-4 h-4" /> Daftar Gratis
                   </Link>
@@ -220,6 +220,7 @@ export default function Navbar() {
           </div>
         </>
       )}
+
 
     </header>
   );
