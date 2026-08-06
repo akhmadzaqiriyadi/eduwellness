@@ -259,7 +259,7 @@ export default function RiwayatPage() {
       </div>
 
       {/* SUMMARY STATS CARDS */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
         <div className="glass-card p-4 sm:p-6 rounded-3xl bg-white border-sky-100 space-y-1.5 sm:space-y-2">
           <span className="text-xs text-slate-500 font-bold">Total Pengecekan</span>
           <div className="text-2xl sm:text-3xl font-black text-slate-900">{filteredHistory.length} kali</div>
@@ -291,6 +291,7 @@ export default function RiwayatPage() {
           <span className="text-[10px] sm:text-[11px] text-slate-500 font-semibold truncate">Pemantauan IoT</span>
         </div>
       </div>
+
 
       {/* SEARCH & REUSABLE CUSTOM SELECT FILTER BAR */}
       <div className="glass-card p-4 sm:p-6 rounded-3xl bg-white border-sky-100 space-y-4 shadow-xs relative z-30">

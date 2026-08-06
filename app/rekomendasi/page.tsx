@@ -61,14 +61,14 @@ export default function RekomendasiPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-8 sm:space-y-10">
       
       {/* HERO BANNER REKOMENDASI */}
-      <div className="glass-card p-6 sm:p-12 rounded-3xl bg-white border-sky-100 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center shadow-xl shadow-sky-500/5">
-        <div className="lg:col-span-7 space-y-3 sm:space-y-4">
+      <div className="glass-card p-6 sm:p-12 rounded-3xl bg-white border-sky-100 grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 items-center shadow-xl shadow-sky-500/5">
+        <div className="md:col-span-7 space-y-3 sm:space-y-4">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-100 text-sky-700 text-xs font-extrabold border border-sky-200">
             <Sparkles className="w-4 h-4 text-sky-500 shrink-0" />
             <span>Sistem Rekomendasi Kesehatan Cerdas</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-black text-slate-900 leading-tight">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-slate-900 leading-tight">
             Rekomendasi <br className="hidden sm:inline" />
             <span className="text-gradient">Kesehatan Personal</span>
           </h1>
@@ -96,7 +96,7 @@ export default function RekomendasiPage() {
           </div>
         </div>
 
-        <div className="lg:col-span-5 relative h-52 sm:h-72 rounded-2xl overflow-hidden border border-sky-100 shadow-md">
+        <div className="md:col-span-5 relative h-52 sm:h-64 md:h-72 rounded-2xl overflow-hidden border border-sky-100 shadow-md">
           <Image
             src="/literasi.jpeg"
             alt="Rekomendasi Kesehatan EduWellness"
@@ -106,6 +106,7 @@ export default function RekomendasiPage() {
           />
         </div>
       </div>
+
 
       {/* CURRENT CONDITION OVERVIEW CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">

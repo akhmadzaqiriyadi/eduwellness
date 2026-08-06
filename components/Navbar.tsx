@@ -57,15 +57,15 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* DESKTOP NAVIGATION LINKS */}
-          <nav className="hidden md:flex items-center gap-1 bg-sky-50/80 p-1.5 rounded-full border border-sky-100">
+          {/* DESKTOP & TABLET NAVIGATION LINKS */}
+          <nav className="hidden md:flex items-center gap-0.5 lg:gap-1 bg-sky-50/80 p-1 lg:p-1.5 rounded-full border border-sky-100">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-3.5 lg:px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                  className={`px-2.5 lg:px-4 py-1.5 lg:py-2 rounded-full text-[11px] lg:text-xs font-bold whitespace-nowrap transition-all ${
                     isActive
                       ? 'bg-sky-500 text-white shadow-md shadow-sky-500/20'
                       : 'text-slate-600 hover:text-sky-600 hover:bg-white/60'
@@ -76,6 +76,7 @@ export default function Navbar() {
               );
             })}
           </nav>
+
 
           {/* DESKTOP RIGHT ACTION BUTTONS & USER ROLE BADGE */}
           <div className="hidden md:flex items-center gap-3">

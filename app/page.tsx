@@ -8,16 +8,16 @@ export default function HomePage() {
       
       {/* HERO SECTION */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 sm:pt-6 pb-8 sm:pb-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 lg:gap-12 items-center">
           
           {/* LEFT CONTENT */}
-          <div className="lg:col-span-7 space-y-4 sm:space-y-6 text-left">
+          <div className="md:col-span-7 space-y-4 sm:space-y-6 text-left">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-100 text-sky-700 text-xs font-extrabold">
               <Sparkles className="w-3.5 h-3.5 text-sky-500 shrink-0" />
               <span className="truncate">Aplikasi Web Berbasis IoT Terintegrasi</span>
             </div>
 
-            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-slate-900 leading-[1.2] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 leading-[1.2] tracking-tight">
               Sensor Suhu & Detak Jantung <br className="hidden sm:inline" />
               <span className="text-gradient">Literasi Kesehatan Siswa</span>
             </h1>
@@ -29,14 +29,14 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-2 sm:pt-4">
               <Link
                 href="/dashboard"
-                className="w-full sm:w-auto px-8 py-3.5 sm:py-4 rounded-full bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-xl shadow-sky-500/25 hover:scale-105 transition-all"
+                className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-sky-500/25 hover:scale-105 transition-all"
               >
                 Cek Kesehatanmu <ArrowRight className="w-4 h-4" />
               </Link>
 
               <Link
                 href="/edukasi"
-                className="w-full sm:w-auto px-8 py-3.5 sm:py-4 rounded-full bg-white hover:bg-sky-50 text-slate-700 border border-sky-200 font-extrabold text-sm flex items-center justify-center gap-2 shadow-xs transition-all"
+                className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-white hover:bg-sky-50 text-slate-700 border border-sky-200 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all"
               >
                 Mulai Belajar
               </Link>
@@ -44,8 +44,8 @@ export default function HomePage() {
           </div>
 
           {/* RIGHT 3D HERO ILLUSTRATION */}
-          <div className="lg:col-span-5 relative flex justify-center pt-4 lg:pt-0">
-            <div className="w-full max-w-md h-64 sm:h-80 lg:h-[420px] rounded-3xl overflow-hidden glass-card p-2.5 sm:p-3 shadow-2xl shadow-sky-500/20 border-white relative group animate-bounce-slow">
+          <div className="md:col-span-5 relative flex justify-center pt-2 md:pt-0">
+            <div className="w-full max-w-md h-64 sm:h-80 md:h-96 lg:h-[420px] rounded-3xl overflow-hidden glass-card p-2.5 sm:p-3 shadow-2xl shadow-sky-500/20 border-white relative group animate-bounce-slow">
               <div className="relative w-full h-full rounded-2xl overflow-hidden bg-gradient-to-tr from-sky-100 to-sky-50">
                 <Image
                   src="/literasi.jpeg"
@@ -60,6 +60,7 @@ export default function HomePage() {
 
         </div>
       </section>
+
 
       {/* FITUR KEREN SECTION */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8 text-center">
