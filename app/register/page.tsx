@@ -62,8 +62,8 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center px-4 py-12">
-      <div className="max-w-md w-full glass-card p-8 rounded-3xl bg-white border-sky-100 shadow-2xl space-y-6">
+    <div className="min-h-[85vh] flex items-center justify-center px-3 sm:px-4 py-8 sm:py-12">
+      <div className="max-w-md w-full glass-card p-5 sm:p-8 rounded-3xl bg-white border-sky-100 shadow-2xl space-y-5 sm:space-y-6">
         
         {/* Header */}
         <div className="text-center space-y-2">
@@ -72,15 +72,16 @@ export default function RegisterPage() {
             alt="EduWellness Logo"
             width={48}
             height={48}
-            className="w-12 h-12 object-contain mx-auto drop-shadow-sm"
+            className="w-10 h-10 sm:w-12 sm:h-12 object-contain mx-auto drop-shadow-xs"
           />
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-100 text-sky-700 text-[11px] font-extrabold">
-            <Sparkles className="w-3.5 h-3.5 text-sky-500" />
+            <Sparkles className="w-3.5 h-3.5 text-sky-500 shrink-0" />
             <span>EduWellness Gen Z Community</span>
           </div>
-          <h2 className="text-2xl font-extrabold text-slate-900">Buat Akun Siswa Baru</h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">Buat Akun Siswa Baru</h2>
           <p className="text-xs text-slate-500">Gabung platform IoT literasi & pantau kesehatanmu</p>
         </div>
+
 
         {/* Alerts */}
         {errorMsg && (

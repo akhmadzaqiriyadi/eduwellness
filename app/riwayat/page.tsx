@@ -207,33 +207,33 @@ export default function RiwayatPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-10">
       
       {/* HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 glass-card p-8 rounded-3xl bg-white border-sky-100 shadow-xl shadow-sky-500/5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 glass-card p-5 sm:p-8 rounded-3xl bg-white border-sky-100 shadow-xl shadow-sky-500/5">
         <div>
-          <div className="flex items-center gap-2 text-xs font-bold text-sky-600 mb-2">
-            <Clock className="w-4 h-4 text-sky-500" />
+          <div className="flex items-center gap-2 text-xs font-bold text-sky-600 mb-1 sm:mb-2">
+            <Clock className="w-4 h-4 text-sky-500 shrink-0" />
             <span>Health History & Analytics</span>
           </div>
-          <h1 className="text-3xl font-extrabold text-slate-900 flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 flex items-center gap-2">
             Riwayat Pengecekan Kesehatan
           </h1>
           <p className="text-xs text-slate-500 mt-1">
             {session.role === 'admin' ? (
               <span className="text-amber-700 font-bold flex items-center gap-1">
-                <Crown className="w-3.5 h-3.5 text-amber-500" /> Mode Admin Pengelola: Menampilkan seluruh data kesehatan siswa
+                <Crown className="w-3.5 h-3.5 text-amber-500 shrink-0" /> Mode Admin: Seluruh data siswa
               </span>
             ) : (
-              <span>Menampilkan riwayat tes pribadi milik: <strong className="text-slate-900">{session.email}</strong></span>
+              <span>Riwayat tes pribadi: <strong className="text-slate-900">{session.email}</strong></span>
             )}
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
           <button
             onClick={() => session && fetchHistory(session)}
-            className="p-3 rounded-full bg-sky-50 border border-sky-100 text-slate-600 hover:text-sky-600 transition-colors flex items-center gap-1.5"
+            className="p-2.5 sm:p-3 rounded-full bg-sky-50 border border-sky-100 text-slate-600 hover:text-sky-600 transition-colors flex items-center gap-1.5"
             title="Refresh Data"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-sky-500' : ''}`} />
@@ -242,7 +242,7 @@ export default function RiwayatPage() {
           {session.role === 'admin' && (
             <button
               onClick={exportToCSV}
-              className="px-5 py-3 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-md hover:scale-105 transition-all"
+              className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-md hover:scale-105 transition-all"
             >
               <Download className="w-4 h-4" /> Export CSV
             </button>
@@ -250,7 +250,7 @@ export default function RiwayatPage() {
 
           <Link
             href="/dashboard"
-            className="px-6 py-3 rounded-full bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-xs flex items-center gap-2 shadow-lg shadow-sky-500/25 hover:scale-105 transition-all"
+            className="px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-xs flex items-center gap-2 shadow-lg shadow-sky-500/25 hover:scale-105 transition-all"
           >
             <Plus className="w-4 h-4" />
             Tes Baru (Live IoT)
@@ -259,48 +259,48 @@ export default function RiwayatPage() {
       </div>
 
       {/* SUMMARY STATS CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="glass-card p-6 rounded-3xl bg-white border-sky-100 space-y-2">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+        <div className="glass-card p-4 sm:p-6 rounded-3xl bg-white border-sky-100 space-y-1.5 sm:space-y-2">
           <span className="text-xs text-slate-500 font-bold">Total Pengecekan</span>
-          <div className="text-3xl font-black text-slate-900">{filteredHistory.length} kali</div>
-          <span className="text-[11px] text-sky-600 flex items-center gap-1 font-semibold">
-            <CheckCircle2 className="w-3.5 h-3.5" /> 
+          <div className="text-2xl sm:text-3xl font-black text-slate-900">{filteredHistory.length} kali</div>
+          <span className="text-[10px] sm:text-[11px] text-sky-600 flex items-center gap-1 font-semibold truncate">
+            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> 
             {session.role === 'admin' ? 'Total Seluruh Siswa' : `Tersimpan untuk ${session.name}`}
           </span>
         </div>
 
-        <div className="glass-card p-6 rounded-3xl bg-white border-sky-100 space-y-2">
-          <span className="text-xs text-slate-500 font-bold">Rata-rata Suhu Tubuh</span>
-          <div className="text-3xl font-black text-sky-600">{avgSuhu} °C</div>
-          <span className="text-[11px] text-emerald-600 flex items-center gap-1 font-semibold">
-            <ShieldCheck className="w-3.5 h-3.5" /> Rentang Normal (36.1 - 37.2°C)
+        <div className="glass-card p-4 sm:p-6 rounded-3xl bg-white border-sky-100 space-y-1.5 sm:space-y-2">
+          <span className="text-xs text-slate-500 font-bold">Rata-rata Suhu</span>
+          <div className="text-2xl sm:text-3xl font-black text-sky-600">{avgSuhu} °C</div>
+          <span className="text-[10px] sm:text-[11px] text-emerald-600 flex items-center gap-1 font-semibold truncate">
+            <ShieldCheck className="w-3.5 h-3.5 shrink-0" /> Normal (36.1 - 37.2°C)
           </span>
         </div>
 
-        <div className="glass-card p-6 rounded-3xl bg-white border-sky-100 space-y-2">
+        <div className="glass-card p-4 sm:p-6 rounded-3xl bg-white border-sky-100 space-y-1.5 sm:space-y-2">
           <span className="text-xs text-slate-500 font-bold">Rata-rata BPM</span>
-          <div className="text-3xl font-black text-rose-500">{avgBpm} BPM</div>
-          <span className="text-[11px] text-rose-500 flex items-center gap-1 font-semibold">
-            <Heart className="w-3.5 h-3.5 fill-rose-500" /> Istirahat Normal
+          <div className="text-2xl sm:text-3xl font-black text-rose-500">{avgBpm} BPM</div>
+          <span className="text-[10px] sm:text-[11px] text-rose-500 flex items-center gap-1 font-semibold truncate">
+            <Heart className="w-3.5 h-3.5 fill-rose-500 shrink-0" /> Istirahat Normal
           </span>
         </div>
 
-        <div className="glass-card p-6 rounded-3xl bg-white border-sky-100 space-y-2">
-          <span className="text-xs text-slate-500 font-bold">Status Keseluruhan</span>
-          <div className="text-3xl font-black text-emerald-600">Sehat</div>
-          <span className="text-[11px] text-slate-500 font-semibold">Pemantauan Berkala IoT</span>
+        <div className="glass-card p-4 sm:p-6 rounded-3xl bg-white border-sky-100 space-y-1.5 sm:space-y-2">
+          <span className="text-xs text-slate-500 font-bold">Status Utama</span>
+          <div className="text-2xl sm:text-3xl font-black text-emerald-600">Sehat</div>
+          <span className="text-[10px] sm:text-[11px] text-slate-500 font-semibold truncate">Pemantauan IoT</span>
         </div>
       </div>
 
       {/* SEARCH & REUSABLE CUSTOM SELECT FILTER BAR */}
-      <div className="glass-card p-6 rounded-3xl bg-white border-sky-100 space-y-4 shadow-sm relative z-30">
-        <div className="flex items-center justify-between border-b border-sky-50 pb-3">
+      <div className="glass-card p-4 sm:p-6 rounded-3xl bg-white border-sky-100 space-y-4 shadow-xs relative z-30">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-sky-50 pb-3">
           <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-            <Filter className="w-4 h-4 text-sky-500" /> Filter & Pencarian Riwayat
+            <Filter className="w-4 h-4 text-sky-500 shrink-0" /> Filter & Pencarian Riwayat
           </span>
 
           <span className="text-[11px] text-slate-500 font-semibold">
-            Menampilkan <strong>{filteredHistory.length}</strong> data terfilter
+            Menampilkan <strong>{filteredHistory.length}</strong> data
           </span>
         </div>
 
@@ -312,7 +312,7 @@ export default function RiwayatPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={session.role === 'admin' ? "Cari email siswa, status, atau tanggal..." : "Cari status atau tanggal..."}
+              placeholder={session.role === 'admin' ? "Cari email, status, atau tanggal..." : "Cari status atau tanggal..."}
               className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-sky-100 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:bg-white transition-all"
             />
           </div>
@@ -320,7 +320,7 @@ export default function RiwayatPage() {
           {/* CUSTOM REUSABLE SELECT - STATUS FILTER */}
           <CustomSelect
             options={[
-              { value: 'Semua', label: 'Semua Status Kesehatan' },
+              { value: 'Semua', label: 'Semua Status' },
               { value: 'Normal', label: 'Normal' },
               { value: 'Demam', label: 'Demam (>= 37.5°C)' },
               { value: 'Hipotermia', label: 'Hipotermia (32.0 - 34.9°C)' },
@@ -333,8 +333,8 @@ export default function RiwayatPage() {
           {/* CUSTOM REUSABLE SELECT - SORT ORDER */}
           <CustomSelect
             options={[
-              { value: 'desc', label: 'Urutan: Terbaru ke Terlama' },
-              { value: 'asc', label: 'Urutan: Terlama ke Terbaru' },
+              { value: 'desc', label: 'Urutan: Terbaru' },
+              { value: 'asc', label: 'Urutan: Terlama' },
             ]}
             value={sortOrder}
             onChange={(val) => setSortOrder(val as 'desc' | 'asc')}
@@ -343,13 +343,13 @@ export default function RiwayatPage() {
 
         {/* USER QUICK CATEGORY BUTTONS */}
         {session.role === 'user' && (
-          <div className="flex items-center gap-2 pt-2 border-t border-sky-50">
-            <span className="text-xs text-slate-500 font-bold mr-1">Kategori Cepat:</span>
+          <div className="flex items-center gap-2 pt-2 border-t border-sky-50 overflow-x-auto no-scrollbar py-1">
+            <span className="text-xs text-slate-500 font-bold mr-1 shrink-0">Kategori:</span>
             {(['Semua', 'Normal', 'Peringatan'] as const).map((cat) => (
               <button
                 key={cat}
                 onClick={() => setQuickFilterCategory(cat)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
+                className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 transition-all ${
                   quickFilterCategory === cat
                     ? 'bg-sky-500 text-white shadow-md shadow-sky-500/20'
                     : 'bg-slate-50 text-slate-600 hover:bg-sky-50 border border-slate-200'
@@ -363,14 +363,14 @@ export default function RiwayatPage() {
       </div>
 
       {/* HISTORY TABLE & PAGINATION */}
-      <div className="glass-card p-8 rounded-3xl bg-white border-sky-100 space-y-6 shadow-md shadow-sky-500/5 relative z-10">
+      <div className="glass-card p-5 sm:p-8 rounded-3xl bg-white border-sky-100 space-y-4 sm:space-y-6 shadow-md shadow-sky-500/5 relative z-10">
         <div className="flex items-center justify-between">
-          <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-sky-500" /> Log Pengecekan Terakhir
+          <h3 className="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+            <FileText className="w-5 h-5 text-sky-500 shrink-0" /> Log Pengecekan Terakhir
           </h3>
           {loading && (
             <span className="text-xs text-sky-600 font-bold flex items-center gap-1.5 animate-pulse">
-              <Loader2 className="w-4 h-4 animate-spin text-sky-500" /> Memperbarui data...
+              <Loader2 className="w-4 h-4 animate-spin text-sky-500" /> Memperbarui...
             </span>
           )}
         </div>
@@ -404,22 +404,22 @@ export default function RiwayatPage() {
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <div className="overflow-x-auto -mx-5 px-5 sm:mx-0 sm:px-0">
+              <table className="w-full text-left text-xs min-w-[620px]">
                 <thead>
                   <tr className="border-b border-sky-100 text-slate-500 font-bold">
-                    <th className="pb-4 pt-2 px-4">WAKTU & TANGGAL</th>
-                    {session.role === 'admin' && <th className="pb-4 pt-2 px-4">EMAIL SISWA</th>}
-                    <th className="pb-4 pt-2 px-4">SUHU OBJEK</th>
-                    <th className="pb-4 pt-2 px-4">SUHU AMBIENT</th>
-                    <th className="pb-4 pt-2 px-4">DETAK JANTUNG</th>
-                    <th className="pb-4 pt-2 px-4">STATUS KESEHATAN</th>
+                    <th className="pb-3 pt-2 px-3 sm:px-4">WAKTU & TANGGAL</th>
+                    {session.role === 'admin' && <th className="pb-3 pt-2 px-3 sm:px-4">EMAIL SISWA</th>}
+                    <th className="pb-3 pt-2 px-3 sm:px-4">SUHU OBJEK</th>
+                    <th className="pb-3 pt-2 px-3 sm:px-4">SUHU AMBIENT</th>
+                    <th className="pb-3 pt-2 px-3 sm:px-4">DETAK JANTUNG</th>
+                    <th className="pb-3 pt-2 px-3 sm:px-4">STATUS KESEHATAN</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-sky-100">
                   {paginatedHistory.map((record, idx) => (
                     <tr key={record.id || idx} className="hover:bg-sky-50/50 transition-colors">
-                      <td className="py-4 px-4 font-mono text-slate-700 font-semibold">
+                      <td className="py-3.5 px-3 sm:px-4 font-mono text-slate-700 font-semibold whitespace-nowrap">
                         {new Date(record.created_at || Date.now()).toLocaleString('id-ID', {
                           day: 'numeric',
                           month: 'short',
@@ -430,25 +430,25 @@ export default function RiwayatPage() {
                       </td>
 
                       {session.role === 'admin' && (
-                        <td className="py-4 px-4 font-semibold text-slate-900">
+                        <td className="py-3.5 px-3 sm:px-4 font-semibold text-slate-900 whitespace-nowrap">
                           {record.user_email || 'Anonim'}
                         </td>
                       )}
 
-                      <td className="py-4 px-4 font-extrabold text-sky-600 text-sm">
+                      <td className="py-3.5 px-3 sm:px-4 font-extrabold text-sky-600 text-xs sm:text-sm whitespace-nowrap">
                         {record.suhu_objek.toFixed(1)} °C
                       </td>
 
-                      <td className="py-4 px-4 text-slate-600 font-semibold">
+                      <td className="py-3.5 px-3 sm:px-4 text-slate-600 font-semibold whitespace-nowrap">
                         {record.suhu_ambient.toFixed(1)} °C
                       </td>
 
-                      <td className="py-4 px-4 font-extrabold text-rose-500 text-sm">
+                      <td className="py-3.5 px-3 sm:px-4 font-extrabold text-rose-500 text-xs sm:text-sm whitespace-nowrap">
                         {record.bpm} BPM
                       </td>
 
-                      <td className="py-4 px-4">
-                        <span className={`inline-flex items-center gap-1 px-3.5 py-1 rounded-full font-bold text-[11px] ${
+                      <td className="py-3.5 px-3 sm:px-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full font-bold text-[11px] ${
                           record.status_kesehatan.includes('Demam') || record.status_kesehatan.includes('Tinggi')
                             ? 'bg-amber-50 text-amber-700 border border-amber-200'
                             : record.status_kesehatan.includes('Hipotermia')
@@ -465,26 +465,26 @@ export default function RiwayatPage() {
             </div>
 
             {/* PAGINATION CONTROLS */}
-            <div className="pt-4 border-t border-sky-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="pt-4 border-t border-sky-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
               <span className="text-xs text-slate-500 font-medium">
-                Menampilkan data <strong className="text-slate-900">{startIndex + 1}</strong> - <strong className="text-slate-900">{Math.min(endIndex, filteredHistory.length)}</strong> dari <strong className="text-slate-900">{filteredHistory.length}</strong> total catatan
+                Data <strong className="text-slate-900">{startIndex + 1}</strong> - <strong className="text-slate-900">{Math.min(endIndex, filteredHistory.length)}</strong> dari <strong className="text-slate-900">{filteredHistory.length}</strong> total
               </span>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 <button
                   onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-2 rounded-xl bg-slate-50 hover:bg-sky-50 border border-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1 disabled:opacity-40 disabled:hover:bg-slate-50 transition-all"
+                  className="px-3 py-1.5 sm:py-2 rounded-xl bg-slate-50 hover:bg-sky-50 border border-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1 disabled:opacity-40 disabled:hover:bg-slate-50 transition-all"
                 >
                   <ChevronLeft className="w-4 h-4" /> Sebelum
                 </button>
 
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
                     <button
                       key={pageNum}
                       onClick={() => setCurrentPage(pageNum)}
-                      className={`w-8 h-8 rounded-xl text-xs font-bold transition-all ${
+                      className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl text-xs font-bold transition-all shrink-0 ${
                         currentPage === pageNum
                           ? 'bg-sky-500 text-white shadow-md shadow-sky-500/20'
                           : 'bg-slate-50 hover:bg-sky-50 text-slate-600 border border-slate-200'
@@ -498,7 +498,7 @@ export default function RiwayatPage() {
                 <button
                   onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-2 rounded-xl bg-slate-50 hover:bg-sky-50 border border-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1 disabled:opacity-40 disabled:hover:bg-slate-50 transition-all"
+                  className="px-3 py-1.5 sm:py-2 rounded-xl bg-slate-50 hover:bg-sky-50 border border-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1 disabled:opacity-40 disabled:hover:bg-slate-50 transition-all"
                 >
                   Berikut <ChevronRight className="w-4 h-4" />
                 </button>
@@ -511,3 +511,4 @@ export default function RiwayatPage() {
     </div>
   );
 }
+

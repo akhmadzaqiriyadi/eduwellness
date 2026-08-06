@@ -237,64 +237,64 @@ export default function DashboardPage() {
   const bpmStatus = getBpmStatus();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8">
       
       {/* HEADER & USER BANNER */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 glass-card p-8 rounded-3xl bg-white border-sky-100 shadow-xl shadow-sky-500/5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 glass-card p-5 sm:p-8 rounded-3xl bg-white border-sky-100 shadow-xl shadow-sky-500/5">
         <div>
-          <div className="flex items-center gap-2 text-xs font-bold text-sky-600 mb-2">
-            <Zap className="w-4 h-4" />
+          <div className="flex items-center gap-2 text-xs font-bold text-sky-600 mb-1 sm:mb-2">
+            <Zap className="w-4 h-4 shrink-0" />
             <span>IoT Real-Time Health Monitor</span>
           </div>
-          <h1 className="text-3xl font-extrabold text-slate-900">Status Kesehatan Real-Time 📊</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">Status Kesehatan Real-Time 📊</h1>
           <p className="text-xs text-slate-500 mt-1">Data live langsung dari sensor Suhu MLX90614 & BPM MAX30102 Wemos D1</p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-sky-50 border border-sky-100 text-xs text-slate-700 font-semibold">
-            <Clock className="w-4 h-4 text-sky-500" />
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+          <div className="flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full bg-sky-50 border border-sky-100 text-xs text-slate-700 font-semibold">
+            <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-500 shrink-0" />
             <span>Update: <strong className="text-slate-900">{lastUpdated || 'Menghubungkan...'}</strong></span>
           </div>
 
-          <div className={`flex items-center gap-2 px-4 py-2.5 rounded-full border text-xs font-extrabold ${
+          <div className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full border text-xs font-extrabold ${
             isWifiConnected ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-50 border-rose-200 text-rose-700'
           }`}>
-            <span className={`w-2.5 h-2.5 rounded-full ${isWifiConnected ? 'bg-emerald-500 animate-ping' : 'bg-rose-500'}`}></span>
+            <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${isWifiConnected ? 'bg-emerald-500 animate-ping' : 'bg-rose-500'}`}></span>
             {isWifiConnected ? 'Sensor Online ✅' : 'Sensor Offline ❌'}
           </div>
         </div>
       </div>
 
       {/* IOT DEVICE & WIFI CONNECTION STATUS BADGE CARD */}
-      <div className="glass-card p-6 rounded-3xl bg-white border-sky-100 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${
+      <div className="glass-card p-5 sm:p-6 rounded-3xl bg-white border-sky-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6 shadow-sm">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center border shrink-0 ${
             isWifiConnected ? 'bg-emerald-50 border-emerald-200 text-emerald-600' : 'bg-rose-50 border-rose-200 text-rose-600'
           }`}>
-            {isWifiConnected ? <Wifi className="w-6 h-6 animate-pulse" /> : <WifiOff className="w-6 h-6" />}
+            {isWifiConnected ? <Wifi className="w-5 h-5 sm:w-6 sm:h-6 animate-pulse" /> : <WifiOff className="w-5 h-5 sm:w-6 sm:h-6" />}
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <span className={`text-sm font-extrabold ${isWifiConnected ? 'text-emerald-700' : 'text-rose-700'}`}>
-                {isWifiConnected ? '🟢 Perangkat IoT Terhubung ke Wi-Fi' : '🔴 Perangkat IoT Terputus dari Wi-Fi'}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className={`text-xs sm:text-sm font-extrabold ${isWifiConnected ? 'text-emerald-700' : 'text-rose-700'}`}>
+                {isWifiConnected ? '🟢 IoT Terhubung Wi-Fi' : '🔴 IoT Terputus Wi-Fi'}
               </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-800 font-black text-[11px] border border-sky-200">
+              <span className="px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 font-black text-[10px] sm:text-[11px] border border-sky-200">
                 {deviceId}
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              SSID Wi-Fi: <strong className="text-slate-800 font-bold">{wifiSsid}</strong> • Diterima {secondsAgo}s yang lalu
+            <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5">
+              SSID: <strong className="text-slate-800 font-bold">{wifiSsid}</strong> • {secondsAgo}s yang lalu
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 font-bold">
-            <Cpu className="w-4 h-4 text-sky-500" />
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 font-bold">
+            <Cpu className="w-3.5 h-3.5 text-sky-500 shrink-0" />
             <span>Wemos D1 mini</span>
           </div>
-          <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 font-bold">
-            <Signal className="w-4 h-4 text-emerald-500" />
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 font-bold">
+            <Signal className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
             <span>Signal Strong</span>
           </div>
         </div>
@@ -302,28 +302,28 @@ export default function DashboardPage() {
 
       {/* AUTO-SAVE COUNTDOWN NOTIFICATION BANNER */}
       {bpm > 0 && userEmail && countdown !== null && countdown > 0 && (
-        <div className="p-6 rounded-3xl bg-gradient-to-r from-sky-600 via-sky-500 to-blue-600 text-white shadow-xl shadow-sky-500/30 space-y-4 border border-sky-400/40 animate-fadeIn">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-sky-600 via-sky-500 to-blue-600 text-white shadow-xl shadow-sky-500/30 space-y-3 sm:space-y-4 border border-sky-400/40 animate-fadeIn">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-white/20 border border-white/30 backdrop-blur-md flex items-center justify-center text-white shrink-0">
-                <Loader2 className="w-6 h-6 animate-spin text-white" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-white/20 border border-white/30 backdrop-blur-md flex items-center justify-center text-white shrink-0">
+                <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 animate-spin text-white" />
               </div>
               <div>
-                <h4 className="text-lg font-black text-white tracking-tight">
-                  Mengukur Kesehatan... Menyimpan Otomatis dalam {countdown} detik ⏳
+                <h4 className="text-base sm:text-lg font-black text-white tracking-tight">
+                  Mengukur Kesehatan... Menyimpan Otomatis ({countdown}s) ⏳
                 </h4>
                 <p className="text-xs text-sky-100 font-medium mt-0.5">
                   Tempelkan sensor di pergelangan tangan. Hasil pengecekan akan otomatis masuk ke Riwayat.
                 </p>
               </div>
             </div>
-            <span className="self-start sm:self-center text-2xl font-black px-5 py-2 rounded-full bg-white text-sky-600 shadow-md">
+            <span className="self-start sm:self-center text-xl sm:text-2xl font-black px-4 py-1.5 sm:px-5 sm:py-2 rounded-full bg-white text-sky-600 shadow-md">
               {countdown}s
             </span>
           </div>
 
           {/* Progress Bar */}
-          <div className="w-full bg-black/20 h-3 rounded-full overflow-hidden p-0.5 border border-white/20">
+          <div className="w-full bg-black/20 h-2.5 sm:h-3 rounded-full overflow-hidden p-0.5 border border-white/20">
             <div
               className="bg-white h-full transition-all duration-1000 ease-linear rounded-full shadow-md"
               style={{ width: `${((10 - countdown) / 10) * 100}%` }}
@@ -333,31 +333,31 @@ export default function DashboardPage() {
       )}
 
       {/* SENSOR LIVE GAUGES */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
         
         {/* SUHU TUBUH CARD */}
-        <div className="glass-card p-8 rounded-3xl space-y-6 relative overflow-hidden bg-white border-sky-100">
-          <div className="flex items-center justify-between">
+        <div className="glass-card p-6 sm:p-8 rounded-3xl space-y-4 sm:space-y-6 relative overflow-hidden bg-white border-sky-100">
+          <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-500">
-                <Activity className="w-6 h-6 animate-pulse" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-500 shrink-0">
+                <Activity className="w-5 h-5 sm:w-6 sm:h-6 animate-pulse" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Suhu Tubuh</h3>
+                <h3 className="text-base sm:text-lg font-bold text-slate-900">Suhu Tubuh</h3>
                 <span className="text-xs text-slate-500">MLX90614 Non-Contact</span>
               </div>
             </div>
             
-            <span className={`px-4 py-1.5 rounded-full border text-xs font-bold ${suhuStatus.color}`}>
+            <span className={`px-3 py-1 rounded-full border text-[11px] sm:text-xs font-bold shrink-0 ${suhuStatus.color}`}>
               {suhuStatus.text}
             </span>
           </div>
 
-          <div className="flex items-baseline gap-3">
-            <span className="text-5xl sm:text-6xl font-black text-sky-600 tracking-tight">
+          <div className="flex items-baseline gap-2 sm:gap-3">
+            <span className="text-4xl sm:text-6xl font-black text-sky-600 tracking-tight">
               {suhuObjek.toFixed(1)}
             </span>
-            <span className="text-2xl font-bold text-sky-400">°C</span>
+            <span className="text-xl sm:text-2xl font-bold text-sky-400">°C</span>
           </div>
 
           <div className="pt-3 border-t border-sky-100 flex items-center justify-between text-xs text-slate-500 font-medium">
@@ -367,34 +367,34 @@ export default function DashboardPage() {
         </div>
 
         {/* DETAK JANTUNG CARD */}
-        <div className="glass-card p-8 rounded-3xl space-y-6 relative overflow-hidden bg-white border-rose-100">
-          <div className="flex items-center justify-between">
+        <div className="glass-card p-6 sm:p-8 rounded-3xl space-y-4 sm:space-y-6 relative overflow-hidden bg-white border-rose-100">
+          <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500">
-                <Heart className="w-6 h-6 fill-rose-500 animate-pulse" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500 shrink-0">
+                <Heart className="w-5 h-5 sm:w-6 sm:h-6 fill-rose-500 animate-pulse" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Detak Jantung</h3>
-                <span className="text-xs text-slate-500">MAX30102 Photoplethysmogram</span>
+                <h3 className="text-base sm:text-lg font-bold text-slate-900">Detak Jantung</h3>
+                <span className="text-xs text-slate-500">MAX30102 PPG Sensor</span>
               </div>
             </div>
 
-            <span className={`px-4 py-1.5 rounded-full border text-xs font-bold ${bpmStatus.color}`}>
+            <span className={`px-3 py-1 rounded-full border text-[11px] sm:text-xs font-bold shrink-0 ${bpmStatus.color}`}>
               {bpmStatus.text}
             </span>
           </div>
 
-          <div className="flex items-baseline gap-3">
-            <span className="text-5xl sm:text-6xl font-black text-rose-500 tracking-tight">
+          <div className="flex items-baseline gap-2 sm:gap-3">
+            <span className="text-4xl sm:text-6xl font-black text-rose-500 tracking-tight">
               {bpm > 0 ? bpm : '--'}
             </span>
-            <span className="text-2xl font-bold text-rose-400">BPM</span>
+            <span className="text-xl sm:text-2xl font-bold text-rose-400">BPM</span>
           </div>
 
           <div className="pt-3 border-t border-rose-100 flex items-center justify-between text-xs text-slate-500 font-medium">
             <span>Status Pengukuran:</span>
             <span className="font-bold text-slate-900">
-              {bpm > 0 ? 'Deteksi Denyut Aktif ✅' : 'Tempelkan sensor di pergelangan tangan 🖐️'}
+              {bpm > 0 ? 'Deteksi Denyut Aktif ✅' : 'Tempelkan sensor di pergelangan 🖐️'}
             </span>
           </div>
         </div>
@@ -402,27 +402,27 @@ export default function DashboardPage() {
       </div>
 
       {/* ACTION: SAVE HEALTH CHECK */}
-      <div className="glass-card p-8 rounded-3xl bg-gradient-to-r from-sky-50 to-indigo-50 border-sky-100 space-y-4">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-2 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white text-sky-700 text-xs font-bold border border-sky-200">
-              <UserCheck className="w-4 h-4 text-sky-500" />
+      <div className="glass-card p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-sky-50 to-indigo-50 border-sky-100 space-y-4">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 sm:gap-6">
+          <div className="space-y-1.5 text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white text-sky-700 text-xs font-bold border border-sky-200">
+              <UserCheck className="w-3.5 h-3.5 text-sky-500 shrink-0" />
               <span>Sistem Pencatatan Otomatis Siswa</span>
             </div>
-            <h3 className="text-xl font-bold text-slate-900">Simpan Hasil Pengecekan ke Riwayat</h3>
+            <h3 className="text-lg sm:text-xl font-bold text-slate-900">Simpan Hasil Pengecekan ke Riwayat</h3>
             <p className="text-xs text-slate-600">
               {userEmail
-                ? `Terhubung sebagai: ${userEmail}. Hasil tes akan tersimpan otomatis saat mengukur (10d) atau via tombol manual.`
+                ? `Terhubung sebagai: ${userEmail}. Hasil tes akan tersimpan otomatis (10s) atau via tombol manual.`
                 : 'Kamu belum login. Silakan Login terlebih dahulu untuk menyimpan data pengecekan kesehatan ini ke riwayat.'}
             </p>
           </div>
 
-          <div>
+          <div className="w-full md:w-auto">
             {userEmail ? (
               <button
                 onClick={handleSaveCheck}
                 disabled={saving}
-                className="w-full md:w-auto px-8 py-3.5 rounded-full bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-sky-500/25 hover:scale-105 transition-all disabled:opacity-50"
+                className="w-full md:w-auto px-6 sm:px-8 py-3.5 rounded-full bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-sky-500/25 hover:scale-105 transition-all disabled:opacity-50"
               >
                 <Save className="w-4 h-4" />
                 {saving ? 'Menyimpan...' : 'Simpan Sekarang (Manual) 🚀'}
@@ -430,7 +430,7 @@ export default function DashboardPage() {
             ) : (
               <Link
                 href="/login"
-                className="w-full md:w-auto px-8 py-3.5 rounded-full bg-white border border-sky-200 text-sky-600 hover:text-sky-700 font-extrabold text-xs flex items-center justify-center gap-2 hover:bg-sky-50 transition-all shadow-sm"
+                className="w-full md:w-auto px-6 sm:px-8 py-3.5 rounded-full bg-white border border-sky-200 text-sky-600 hover:text-sky-700 font-extrabold text-xs flex items-center justify-center gap-2 hover:bg-sky-50 transition-all shadow-xs"
               >
                 <Lock className="w-4 h-4 text-sky-500" />
                 Login untuk Menyimpan Tes 🔐
@@ -440,11 +440,11 @@ export default function DashboardPage() {
         </div>
 
         {saveMessage && (
-          <div className="p-4 rounded-2xl bg-white border border-sky-200 text-xs font-bold text-sky-700 text-center flex items-center justify-between gap-4 shadow-sm animate-fadeIn">
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-sky-200 text-xs font-bold text-sky-700 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs animate-fadeIn">
             <span>{saveMessage}</span>
             <Link
               href="/riwayat"
-              className="px-4 py-2 rounded-full bg-sky-500 text-white text-xs font-extrabold hover:bg-sky-600 transition-all shrink-0"
+              className="w-full sm:w-auto px-4 py-2 rounded-full bg-sky-500 text-white text-xs font-extrabold text-center hover:bg-sky-600 transition-all shrink-0"
             >
               Lihat Riwayat 📋
             </Link>
@@ -453,17 +453,17 @@ export default function DashboardPage() {
       </div>
 
       {/* REAL-TIME TREND CHARTS */}
-      <div className="glass-card p-8 rounded-3xl bg-white border-sky-100 space-y-6">
+      <div className="glass-card p-5 sm:p-8 rounded-3xl bg-white border-sky-100 space-y-4 sm:space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-sky-500" /> Grafik Tren Real-Time
+            <h3 className="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-sky-500 shrink-0" /> Grafik Tren Real-Time
             </h3>
             <p className="text-xs text-slate-500">Pergerakan suhu tubuh (°C) dan detak jantung (BPM) selama sesi tes</p>
           </div>
         </div>
 
-        <div className="h-72 w-full pt-4">
+        <div className="h-56 sm:h-72 w-full pt-2 sm:pt-4">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData}>
               <defs>
@@ -492,3 +492,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+

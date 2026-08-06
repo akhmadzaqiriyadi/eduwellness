@@ -164,27 +164,27 @@ export default function EdukasiPage() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-8 sm:space-y-12">
       
       {/* HERO BANNER */}
-      <div className="text-center space-y-4 max-w-3xl mx-auto">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-100 text-sky-700 text-xs font-extrabold border border-sky-200">
-          <BookOpen className="w-4 h-4 text-sky-500" />
+      <div className="text-center space-y-3 sm:space-y-4 max-w-3xl mx-auto">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-100 text-sky-700 text-xs font-extrabold border border-sky-200">
+          <BookOpen className="w-4 h-4 text-sky-500 shrink-0" />
           <span>Health Education Hub</span>
         </div>
-        <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 leading-tight">
+        <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 leading-tight">
           Edukasi <span className="text-gradient">Kesehatan</span>
         </h1>
-        <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+        <p className="text-slate-600 text-xs sm:text-base leading-relaxed">
           Pelajari bahaya rokok, kesehatan reproduksi & menstruasi, pola makan sehat, pola tidur, serta 10 Kebiasaan PHBS lengkap dalam satu platform!
         </p>
       </div>
 
-      {/* CATEGORY TAB NAVIGATION */}
-      <div className="flex flex-wrap items-center justify-center gap-2 p-2 rounded-full glass-card border border-sky-100 max-w-4xl mx-auto bg-white">
+      {/* CATEGORY TAB NAVIGATION - SWIPEABLE HORIZONTAL SCROLL ON MOBILE */}
+      <div className="flex items-center gap-2 p-2 rounded-2xl sm:rounded-full glass-card border border-sky-100 max-w-4xl mx-auto bg-white overflow-x-auto no-scrollbar py-2.5 px-3">
         <button
           onClick={() => setActiveTab('rokok')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-extrabold transition-all ${
+          className={`flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-extrabold shrink-0 transition-all ${
             activeTab === 'rokok'
               ? 'bg-rose-500 text-white shadow-md shadow-rose-500/25'
               : 'text-slate-600 hover:text-sky-600 hover:bg-sky-50'
@@ -195,7 +195,7 @@ export default function EdukasiPage() {
 
         <button
           onClick={() => setActiveTab('menstruasi')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-extrabold transition-all ${
+          className={`flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-extrabold shrink-0 transition-all ${
             activeTab === 'menstruasi'
               ? 'bg-pink-500 text-white shadow-md shadow-pink-500/25'
               : 'text-slate-600 hover:text-sky-600 hover:bg-sky-50'
@@ -206,7 +206,7 @@ export default function EdukasiPage() {
 
         <button
           onClick={() => setActiveTab('pola-makan')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-extrabold transition-all ${
+          className={`flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-extrabold shrink-0 transition-all ${
             activeTab === 'pola-makan'
               ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25'
               : 'text-slate-600 hover:text-sky-600 hover:bg-sky-50'
@@ -217,7 +217,7 @@ export default function EdukasiPage() {
 
         <button
           onClick={() => setActiveTab('pola-tidur')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-extrabold transition-all ${
+          className={`flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-extrabold shrink-0 transition-all ${
             activeTab === 'pola-tidur'
               ? 'bg-indigo-500 text-white shadow-md shadow-indigo-500/25'
               : 'text-slate-600 hover:text-sky-600 hover:bg-sky-50'
@@ -228,7 +228,7 @@ export default function EdukasiPage() {
 
         <button
           onClick={() => setActiveTab('phbs')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-extrabold transition-all ${
+          className={`flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-extrabold shrink-0 transition-all ${
             activeTab === 'phbs'
               ? 'bg-sky-500 text-white shadow-md shadow-sky-500/25'
               : 'text-slate-600 hover:text-sky-600 hover:bg-sky-50'
@@ -237,6 +237,7 @@ export default function EdukasiPage() {
           <ShieldCheck className="w-4 h-4" /> 10 Kebiasaan PHBS
         </button>
       </div>
+
 
       {/* TAB 1: BAHAYA ROKOK */}
       {activeTab === 'rokok' && (
@@ -424,12 +425,12 @@ export default function EdukasiPage() {
               />
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+            <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto no-scrollbar py-1">
               {['Semua', 'Kebersihan Diri', 'Nutrisi & Lingkungan', 'Kebiasaan Sehat & Paru'].map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setPhbsSelectedCategory(cat)}
-                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                  className={`px-4 py-2 rounded-full text-xs font-bold shrink-0 transition-all ${
                     phbsSelectedCategory === cat
                       ? 'bg-sky-500 text-white shadow-md shadow-sky-500/20'
                       : 'bg-slate-50 text-slate-600 hover:bg-sky-50 hover:text-sky-600 border border-slate-200'
@@ -440,6 +441,7 @@ export default function EdukasiPage() {
               ))}
             </div>
           </div>
+
 
           {/* 10 PHBS HABITS GRID */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

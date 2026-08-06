@@ -79,8 +79,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
-      <div className="max-w-md w-full glass-card p-8 rounded-3xl bg-white border-sky-100 shadow-2xl space-y-6">
+    <div className="min-h-[80vh] flex items-center justify-center px-3 sm:px-4 py-8 sm:py-12">
+      <div className="max-w-md w-full glass-card p-5 sm:p-8 rounded-3xl bg-white border-sky-100 shadow-2xl space-y-5 sm:space-y-6">
         
         {/* Header */}
         <div className="text-center space-y-2">
@@ -89,11 +89,12 @@ export default function LoginPage() {
             alt="EduWellness Logo"
             width={48}
             height={48}
-            className="w-12 h-12 object-contain mx-auto drop-shadow-sm"
+            className="w-10 h-10 sm:w-12 sm:h-12 object-contain mx-auto drop-shadow-xs"
           />
-          <h2 className="text-2xl font-extrabold text-slate-900">Masuk ke EduWellness</h2>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">Masuk ke EduWellness</h2>
           <p className="text-xs text-slate-500">Masuk sebagai Siswa atau Admin Pengelola Kesehatan</p>
         </div>
+
 
         {/* Role Toggle Selector */}
         <div className="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-slate-100 border border-slate-200">
