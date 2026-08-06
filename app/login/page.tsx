@@ -49,60 +49,57 @@ export default function LoginPage() {
       }
     }
 
-    // 3. Supabase Authentication Check if Configured
+    // 3. Strict Supabase Authentication Verification
     try {
-      if (!isLoginAdmin && process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://your-supabase-project.supabase.co') {
-        const { error } = await supabase.auth.signInWithPassword({
+      if (!isLoginAdmin) {
+        // Attempt strict password sign in with Supabase Auth
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
         if (error) {
-          // Attempt automatic signUp if user doesn't exist in Supabase Auth yet
-          const { error: signUpErr } = await supabase.auth.signUp({
-            email,
-            password,
-          });
-
-          if (signUpErr && !signUpErr.message.toLowerCase().includes('already registered')) {
-            console.warn('Supabase Auth login/signup notice:', signUpErr.message);
-          }
+          // If Supabase Auth returns invalid credentials or user not found
+          console.warn('Supabase Auth error:', error.message);
+          setErrorMsg('❌ Email belum terdaftar atau Kata Sandi salah! Silakan periksa kembali atau buat akun baru di menu Daftar.');
+          setLoading(false);
+          return;
         }
 
-        // Always sync user to public.users table in Supabase DB
+        // Fetch user full name from user_metadata or public.users
+        let fullName = data.user?.user_metadata?.full_name || email.split('@')[0];
         try {
-          await supabase.from('users').upsert([{
-            email: email,
-            full_name: email.split('@')[0],
-            role: 'user',
-            created_at: new Date().toISOString(),
-          }], { onConflict: 'email' });
-        } catch (dbErr) {
-          console.warn('Supabase public.users sync notice:', dbErr);
+          const { data: dbUser } = await supabase.from('users').select('full_name').eq('email', email).maybeSingle();
+          if (dbUser?.full_name) {
+            fullName = dbUser.full_name;
+          }
+        } catch (e) {
+          // Ignore
         }
+
+        saveSession(email, 'user', fullName);
+        setSuccessMsg(`Login berhasil sebagai Siswa (${fullName})! Mengalihkan ke Dashboard...`);
+
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 800);
+        return;
       }
 
-
-      const activeRole: UserRole = isLoginAdmin ? 'admin' : 'user';
-      saveSession(email, activeRole);
-      setSuccessMsg(`Login berhasil sebagai ${activeRole === 'admin' ? 'Admin' : 'Siswa'}! Mengalihkan...`);
+      // Admin Login
+      saveSession(email, 'admin', 'Admin Pengelola');
+      setSuccessMsg('Login berhasil sebagai Admin Pengelola! Mengalihkan ke Riwayat...');
 
       setTimeout(() => {
-        router.push(activeRole === 'admin' ? '/riwayat' : '/dashboard');
+        router.push('/riwayat');
       }, 800);
     } catch (err: any) {
-      console.warn('Login session fallback:', err);
-      const activeRole: UserRole = isLoginAdmin ? 'admin' : 'user';
-      saveSession(email, activeRole);
-      setSuccessMsg(`Login berhasil sebagai ${activeRole === 'admin' ? 'Admin' : 'Siswa'}! Mengalihkan...`);
-
-      setTimeout(() => {
-        router.push(activeRole === 'admin' ? '/riwayat' : '/dashboard');
-      }, 800);
+      setErrorMsg('❌ Gagal memproses login: ' + (err.message || 'Koneksi bermasalah'));
     } finally {
       setLoading(false);
     }
   };
+
 
 
   return (
