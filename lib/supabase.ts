@@ -1,9 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://sobsqatohvodtwecatox.supabase.co';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_3h35LdcseXFpdxWWHjKIPQ_Zl6iq6Y3';
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
+
 
 
 // Interfaces
