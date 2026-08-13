@@ -27,14 +27,17 @@ export default function RegisterPage() {
     setErrorMsg('');
     setSuccessMsg('');
 
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanName = fullName.trim();
+
     try {
       if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://your-supabase-project.supabase.co') {
         const { error } = await supabase.auth.signUp({
-          email,
+          email: cleanEmail,
           password,
           options: {
             data: {
-              full_name: fullName,
+              full_name: cleanName,
               school: school,
               grade: grade,
             },
@@ -44,23 +47,9 @@ export default function RegisterPage() {
         if (error) {
           console.warn('Supabase Auth SignUp notice:', error.message);
         }
-
-        // Also insert into public 'users' table in Supabase DB
-        try {
-          await supabase.from('users').upsert([{
-            email: email,
-            full_name: fullName,
-            school: school,
-            grade: grade,
-            role: 'user',
-            created_at: new Date().toISOString(),
-          }], { onConflict: 'email' });
-        } catch (dbErr) {
-          console.warn('Supabase public.users insert notice:', dbErr);
-        }
       }
 
-      saveSession(email, 'user', fullName);
+      saveSession(cleanEmail, 'user', cleanName, school, grade);
 
       setSuccessMsg('Pendaftaran berhasil! Akun tersimpan di Supabase DB. Mengalihkan...');
       setTimeout(() => {
@@ -68,7 +57,7 @@ export default function RegisterPage() {
       }, 800);
     } catch (err: any) {
       console.warn('Supabase SignUp error, fallback to instant session:', err);
-      saveSession(email, 'user', fullName);
+      saveSession(cleanEmail, 'user', cleanName, school, grade);
 
       setSuccessMsg('Pendaftaran berhasil! Mengalihkan ke IoT Dashboard...');
       setTimeout(() => {

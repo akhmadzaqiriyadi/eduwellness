@@ -3,24 +3,39 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { LogOut, Crown, Menu, X, Home, Info, BookOpen, Activity, Sparkles, History, UserCheck, LogIn, UserPlus } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { LogOut, Crown, Menu, X, Home, Info, BookOpen, Activity, Sparkles, History, UserCheck, LogIn, UserPlus, User, ChevronDown } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
 import { getCurrentSession, clearSession, UserSession } from '@/lib/auth';
 
 export default function Navbar() {
   const pathname = usePathname();
   const [session, setSession] = useState<UserSession | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setSession(getCurrentSession());
     setIsMobileMenuOpen(false);
+    setIsUserMenuOpen(false);
   }, [pathname]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleLogout = () => {
     clearSession();
     setSession(null);
     setIsMobileMenuOpen(false);
+    setIsUserMenuOpen(false);
     window.location.href = '/';
   };
 
@@ -77,31 +92,74 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* DESKTOP RIGHT ACTION BUTTONS & USER ROLE BADGE */}
+          {/* DESKTOP RIGHT ACTION BUTTONS & USER DROPDOWN */}
           <div className="hidden lg:flex items-center gap-3">
             {session ? (
-              <div className="flex items-center gap-2.5">
-                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-extrabold ${
-                  session.role === 'admin' 
-                    ? 'bg-amber-50 border-amber-200 text-amber-700' 
-                    : 'bg-sky-50 border-sky-200 text-sky-700'
-                }`}>
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-extrabold transition-all shadow-xs ${
+                    session.role === 'admin' 
+                      ? 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100' 
+                      : 'bg-sky-50 border-sky-200 text-sky-700 hover:bg-sky-100'
+                  }`}
+                >
                   {session.role === 'admin' ? (
                     <>
                       <Crown className="w-3.5 h-3.5 text-amber-500" />
                       <span>Admin</span>
                     </>
                   ) : (
-                    <span>{session.name}</span>
+                    <>
+                      <User className="w-3.5 h-3.5 text-sky-500" />
+                      <span>{session.name}</span>
+                    </>
                   )}
-                </div>
-
-                <button
-                  onClick={handleLogout}
-                  className="px-3.5 py-1.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 font-bold text-xs flex items-center gap-1 transition-all"
-                >
-                  <LogOut className="w-3.5 h-3.5" /> Logout
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
+
+                {/* USER DROPDOWN MENU CARD */}
+                {isUserMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white border border-sky-100 shadow-xl py-2 space-y-1 z-50 animate-fadeIn text-xs">
+                    <div className="px-4 py-2 border-b border-sky-50 space-y-0.5">
+                      <p className="font-extrabold text-slate-900 truncate">{session.name}</p>
+                      <p className="text-[11px] text-slate-500 font-medium truncate">{session.email}</p>
+                    </div>
+
+                    <Link
+                      href="/profil"
+                      onClick={() => setIsUserMenuOpen(false)}
+                      className={`flex items-center gap-2.5 px-4 py-2.5 font-bold transition-all ${
+                        pathname === '/profil' ? 'bg-sky-50 text-sky-600 font-extrabold' : 'text-slate-700 hover:bg-sky-50 hover:text-sky-600'
+                      }`}
+                    >
+                      <User className="w-4 h-4 text-sky-500 shrink-0" />
+                      <span>Profil Saya</span>
+                    </Link>
+
+                    <Link
+                      href="/riwayat"
+                      onClick={() => setIsUserMenuOpen(false)}
+                      className={`flex items-center gap-2.5 px-4 py-2.5 font-bold transition-all ${
+                        pathname === '/riwayat' ? 'bg-sky-50 text-sky-600 font-extrabold' : 'text-slate-700 hover:bg-sky-50 hover:text-sky-600'
+                      }`}
+                    >
+                      <History className="w-4 h-4 text-sky-500 shrink-0" />
+                      <span>Riwayat Kesehatan</span>
+                    </Link>
+
+                    <div className="border-t border-sky-50 pt-1">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 font-bold text-rose-600 hover:bg-rose-50 transition-all text-left"
+                      >
+                        <LogOut className="w-4 h-4 shrink-0" />
+                        <span>Logout</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="flex items-center gap-2">
@@ -124,13 +182,18 @@ export default function Navbar() {
           {/* TABLET & MOBILE HAMBURGER TOGGLE BUTTON (<1024px) */}
           <div className="flex items-center gap-2 lg:hidden">
             {session && (
-              <div className={`px-2.5 py-1 rounded-full border text-[11px] font-extrabold truncate max-w-[130px] ${
-                session.role === 'admin' 
-                  ? 'bg-amber-50 border-amber-200 text-amber-700' 
-                  : 'bg-sky-50 border-sky-200 text-sky-700'
-              }`}>
+              <Link
+                href="/profil"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`px-2.5 py-1 rounded-full border text-[11px] font-extrabold truncate max-w-[130px] transition-all ${
+                  session.role === 'admin' 
+                    ? 'bg-amber-50 border-amber-200 text-amber-700' 
+                    : 'bg-sky-50 border-sky-200 text-sky-700'
+                }`}
+                title="Buka Profil Saya"
+              >
                 {session.role === 'admin' ? 'Admin' : session.name}
-              </div>
+              </Link>
             )}
 
             <button
@@ -179,7 +242,7 @@ export default function Navbar() {
             <div className="pt-2.5 border-t border-sky-100">
               {session ? (
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200">
+                  <div className="flex items-center justify-between px-4 py-2 rounded-2xl bg-slate-50 border border-slate-200">
                     <span className="text-xs text-slate-500 font-medium">Masuk Sebagai:</span>
                     <span className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold border ${
                       session.role === 'admin' 
@@ -189,6 +252,14 @@ export default function Navbar() {
                       {session.role === 'admin' ? '👑 Admin' : `👤 ${session.name}`}
                     </span>
                   </div>
+
+                  <Link
+                    href="/profil"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full py-2.5 rounded-2xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-extrabold text-xs flex items-center justify-center gap-2 transition-all shadow-xs"
+                  >
+                    <User className="w-4 h-4 text-sky-500" /> Profil Saya
+                  </Link>
 
                   <button
                     onClick={handleLogout}

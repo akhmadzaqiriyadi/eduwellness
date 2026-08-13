@@ -324,7 +324,7 @@ export default function RiwayatPage() {
               { value: 'Semua', label: 'Semua Status' },
               { value: 'Normal', label: 'Normal' },
               { value: 'Demam', label: 'Demam (>= 37.5°C)' },
-              { value: 'Hipotermia', label: 'Hipotermia (32.0 - 34.9°C)' },
+              { value: 'Hipotermia', label: 'Hipotermia (< 35.0°C)' },
               { value: 'Tinggi', label: 'Takikardia (BPM Tinggi)' },
             ]}
             value={statusFilter}
@@ -481,19 +481,42 @@ export default function RiwayatPage() {
                 </button>
 
                 <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-                    <button
-                      key={pageNum}
-                      onClick={() => setCurrentPage(pageNum)}
-                      className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl text-xs font-bold transition-all shrink-0 ${
-                        currentPage === pageNum
-                          ? 'bg-sky-500 text-white shadow-md shadow-sky-500/20'
-                          : 'bg-slate-50 hover:bg-sky-50 text-slate-600 border border-slate-200'
-                      }`}
-                    >
-                      {pageNum}
-                    </button>
-                  ))}
+                  {(() => {
+                    const pages: (number | string)[] = [];
+                    if (totalPages <= 7) {
+                      for (let i = 1; i <= totalPages; i++) pages.push(i);
+                    } else if (currentPage <= 4) {
+                      pages.push(1, 2, 3, 4, 5, '...', totalPages);
+                    } else if (currentPage >= totalPages - 3) {
+                      pages.push(1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+                    } else {
+                      pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+                    }
+
+                    return pages.map((pageNum, i) => {
+                      if (pageNum === '...') {
+                        return (
+                          <span key={`ellipsis-${i}`} className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-xs font-bold text-slate-400">
+                            ...
+                          </span>
+                        );
+                      }
+
+                      return (
+                        <button
+                          key={`page-${pageNum}`}
+                          onClick={() => setCurrentPage(Number(pageNum))}
+                          className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl text-xs font-bold transition-all shrink-0 ${
+                            currentPage === pageNum
+                              ? 'bg-sky-500 text-white shadow-md shadow-sky-500/20'
+                              : 'bg-slate-50 hover:bg-sky-50 text-slate-600 border border-slate-200'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    });
+                  })()}
                 </div>
 
                 <button

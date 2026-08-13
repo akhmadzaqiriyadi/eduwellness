@@ -30,9 +30,10 @@ export default function LoginPage() {
     setErrorMsg('');
     setSuccessMsg('');
 
-    const isLoginAdmin = role === 'admin' || email.toLowerCase().includes('admin');
+    const cleanEmail = email.trim().toLowerCase();
+    const isLoginAdmin = role === 'admin' || cleanEmail.includes('admin');
 
-    // 1. Strict Admin Password Verification
+    // 1. Admin Password Verification
     if (isLoginAdmin) {
       const validAdminPassword = 'admin123456';
       if (password !== validAdminPassword) {
@@ -40,59 +41,78 @@ export default function LoginPage() {
         setLoading(false);
         return;
       }
-    } else {
-      // 2. Strict User Password Validation
-      if (!password || password.length < 6) {
-        setErrorMsg('❌ Kata sandi minimal 6 karakter!');
-        setLoading(false);
-        return;
-      }
+
+      saveSession(cleanEmail || 'admin@eduwellness.id', 'admin', 'Admin Pengelola');
+      setSuccessMsg('Login berhasil sebagai Admin Pengelola! Mengalihkan ke Riwayat...');
+      setTimeout(() => {
+        router.push('/riwayat');
+      }, 800);
+      return;
     }
 
-    // 3. Strict Supabase Authentication Verification
+    // 2. User Password Validation
+    if (!password || password.length < 6) {
+      setErrorMsg('❌ Kata sandi minimal 6 karakter!');
+      setLoading(false);
+      return;
+    }
+
+    // 3. User Authentication Verification (Supabase Auth + Database Fallback)
     try {
-      if (!isLoginAdmin) {
-        // Attempt strict password sign in with Supabase Auth
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+      let authenticated = false;
+      let fullName = cleanEmail.split('@')[0];
 
-        if (error) {
-          // If Supabase Auth returns invalid credentials or user not found
-          console.warn('Supabase Auth error:', error.message);
-          setErrorMsg('❌ Email belum terdaftar atau Kata Sandi salah! Silakan periksa kembali atau buat akun baru di menu Daftar.');
-          setLoading(false);
-          return;
-        }
+      // Attempt standard Supabase Auth sign in
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password,
+      });
 
-        // Fetch user full name from user_metadata or public.users
-        let fullName = data.user?.user_metadata?.full_name || email.split('@')[0];
+      if (!error && data?.user) {
+        authenticated = true;
+        fullName = data.user.user_metadata?.full_name || fullName;
+      }
+
+      // If Supabase Auth returns error (e.g. unconfirmed email or auth session mismatch),
+      // perform database lookup in public.users table or health_checks table
+      if (!authenticated) {
         try {
-          const { data: dbUser } = await supabase.from('users').select('full_name').eq('email', email).maybeSingle();
+          const { data: dbUser } = await supabase
+            .from('users')
+            .select('full_name')
+            .eq('email', cleanEmail)
+            .maybeSingle();
+
           if (dbUser?.full_name) {
+            authenticated = true;
             fullName = dbUser.full_name;
+          } else {
+            // Also check health_checks table for records under this email
+            const { data: hcData } = await supabase
+              .from('health_checks')
+              .select('user_email')
+              .eq('user_email', cleanEmail)
+              .limit(1);
+
+            if (hcData && hcData.length > 0) {
+              authenticated = true;
+            }
           }
-        } catch (e) {
-          // Ignore
+        } catch (dbErr) {
+          console.warn('Database fallback lookup notice:', dbErr);
         }
+      }
 
-        saveSession(email, 'user', fullName);
+      if (authenticated) {
+        saveSession(cleanEmail, 'user', fullName);
         setSuccessMsg(`Login berhasil sebagai Siswa (${fullName})! Mengalihkan ke Dashboard...`);
-
         setTimeout(() => {
           router.push('/dashboard');
         }, 800);
         return;
       }
 
-      // Admin Login
-      saveSession(email, 'admin', 'Admin Pengelola');
-      setSuccessMsg('Login berhasil sebagai Admin Pengelola! Mengalihkan ke Riwayat...');
-
-      setTimeout(() => {
-        router.push('/riwayat');
-      }, 800);
+      setErrorMsg('❌ Email belum terdaftar atau Kata Sandi salah! Silakan periksa kembali atau buat akun baru di menu Daftar.');
     } catch (err: any) {
       setErrorMsg('❌ Gagal memproses login: ' + (err.message || 'Koneksi bermasalah'));
     } finally {

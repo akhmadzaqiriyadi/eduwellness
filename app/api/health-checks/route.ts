@@ -84,10 +84,8 @@ export async function POST(request: Request) {
     let status = 'Normal';
     if (suhu_objek >= 37.5) {
       status = 'Demam';
-    } else if (suhu_objek >= 32.0 && suhu_objek < 35.0) {
+    } else if (suhu_objek < 35.0) {
       status = 'Hipotermia';
-    } else if (suhu_objek < 32.0) {
-      status = 'Normal'; // Room air reading when sensor is not pressed on skin
     } else if (bpm > 100) {
       status = 'Takikardia (Denyut Tinggi)';
     }
