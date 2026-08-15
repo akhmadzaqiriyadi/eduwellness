@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { LogOut, Crown, Menu, X, Home, Info, BookOpen, Activity, Sparkles, History, UserCheck, LogIn, UserPlus, User, ChevronDown } from 'lucide-react';
+import { LogOut, Crown, Menu, X, Home, Info, BookOpen, Activity, Sparkles, History, UserCheck, LogIn, UserPlus, User, ChevronDown, Images } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { getCurrentSession, clearSession, UserSession } from '@/lib/auth';
 
@@ -41,11 +41,12 @@ export default function Navbar() {
 
   const navLinks = [
     { href: '/', label: 'Beranda', icon: Home },
-    { href: '/about', label: 'About Us', icon: Info },
     { href: '/edukasi', label: 'Edukasi Kesehatan', icon: BookOpen },
     { href: '/dashboard', label: 'Status Live', icon: Activity },
     { href: '/rekomendasi', label: 'Rekomendasi', icon: Sparkles },
     { href: '/riwayat', label: 'Riwayat', icon: History },
+    { href: '/galeri', label: 'Galeri', icon: Images },
+    { href: '/about', label: 'About Us', icon: Info },
   ];
 
   return (

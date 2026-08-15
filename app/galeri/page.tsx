@@ -1,0 +1,271 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import Image from 'next/image';
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  Play, 
+  Pause, 
+  Maximize2, 
+  X,
+  Images
+} from 'lucide-react';
+
+const galleryImages = [
+  '/galeri/galery3.webp',
+  '/galeri/galery4.webp',
+  '/galeri/galery5.webp',
+  '/galeri/galery6.webp',
+  '/galeri/galery7.webp',
+  '/galeri/galery8.webp',
+  '/galeri/galery9.webp',
+  '/galeri/galery10.webp',
+  '/galeri/galery11.webp',
+  '/galeri/galery12.webp',
+  '/galeri/galery13.webp',
+  '/galeri/galery14.webp',
+  '/galeri/galery15.webp',
+  '/galeri/galery16.webp',
+  '/galeri/galery17.webp',
+  '/galeri/galery18.webp',
+  '/galeri/galery19.webp',
+  '/galeri/galery20.webp',
+  '/galeri/galery21.webp',
+  '/galeri/galery22.webp',
+  '/galeri/galery23.webp',
+  '/galeri/galery24.webp',
+];
+
+export default function GaleriPage() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const nextSlide = useCallback(() => {
+    setCurrentIndex((prev) => (prev + 1) % galleryImages.length);
+  }, []);
+
+  const prevSlide = useCallback(() => {
+    setCurrentIndex((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
+  }, []);
+
+  // Autoplay timer
+  useEffect(() => {
+    if (!isPlaying) return;
+    const interval = setInterval(nextSlide, 3500);
+    return () => clearInterval(interval);
+  }, [isPlaying, nextSlide]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') nextSlide();
+      if (e.key === 'ArrowLeft') prevSlide();
+      if (e.key === 'Escape') closeFullscreen();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [nextSlide, prevSlide]);
+
+  // Toggle Fullscreen with Browser API
+  const toggleFullscreen = () => {
+    if (!isFullscreen) {
+      setIsFullscreen(true);
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+    } else {
+      closeFullscreen();
+    }
+  };
+
+  const closeFullscreen = () => {
+    setIsFullscreen(false);
+    if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
+  };
+
+  // Sync fullscreen state with browser exit (e.g. user pressed Esc on browser)
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement) {
+        setIsFullscreen(false);
+      }
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  // Lock body scroll when fullscreen
+  useEffect(() => {
+    if (isFullscreen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isFullscreen]);
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8">
+      
+      {/* HEADER SIMPLE */}
+      <div className="text-center space-y-2">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-100 text-sky-700 text-xs font-extrabold border border-sky-200">
+          <Images className="w-4 h-4 text-sky-500" />
+          <span>Galeri Foto</span>
+        </div>
+        <h1 className="text-2xl sm:text-4xl font-black text-slate-900">
+          Galeri <span className="text-gradient">EduWellness</span>
+        </h1>
+      </div>
+
+      {/* MAIN CAROUSEL CONTAINER (FULL 16:9 FRAME) */}
+      <div className="relative glass-card rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl">
+        
+        {/* 16:9 VIEWPORT FULLY COVERED */}
+        <div className="relative aspect-video w-full overflow-hidden flex items-center justify-center bg-slate-950">
+          <Image
+            key={galleryImages[currentIndex]}
+            src={galleryImages[currentIndex]}
+            alt={`Foto Galeri ${currentIndex + 1}`}
+            fill
+            priority
+            sizes="(max-width: 1400px) 100vw, 1400px"
+            className="object-cover transition-opacity duration-300 animate-fadeIn"
+          />
+
+          {/* LEFT ARROW */}
+          <button
+            onClick={prevSlide}
+            className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-black/60 hover:bg-black/85 text-white backdrop-blur-md flex items-center justify-center transition-all border border-white/20 shadow-xl hover:scale-105"
+            aria-label="Foto Sebelumnya"
+          >
+            <ChevronLeft className="w-7 h-7" />
+          </button>
+
+          {/* RIGHT ARROW */}
+          <button
+            onClick={nextSlide}
+            className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-black/60 hover:bg-black/85 text-white backdrop-blur-md flex items-center justify-center transition-all border border-white/20 shadow-xl hover:scale-105"
+            aria-label="Foto Selanjutnya"
+          >
+            <ChevronRight className="w-7 h-7" />
+          </button>
+
+          {/* TOP CONTROLS & COUNTER */}
+          <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none">
+            <span className="px-3.5 py-1.5 rounded-full bg-black/70 text-white text-xs font-black backdrop-blur-md border border-white/20 pointer-events-auto shadow-md">
+              {currentIndex + 1} / {galleryImages.length}
+            </span>
+
+            <div className="flex items-center gap-2 pointer-events-auto">
+              <button
+                onClick={() => setIsPlaying(!isPlaying)}
+                className="w-9 h-9 rounded-full bg-black/70 hover:bg-black text-white backdrop-blur-md flex items-center justify-center transition-all border border-white/20 shadow-md"
+                aria-label={isPlaying ? 'Jeda Slideshow' : 'Putar Slideshow'}
+              >
+                {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
+              </button>
+              <button
+                onClick={toggleFullscreen}
+                className="w-9 h-9 rounded-full bg-black/70 hover:bg-black text-white backdrop-blur-md flex items-center justify-center transition-all border border-white/20 shadow-md"
+                aria-label="Tampilan Layar Penuh"
+              >
+                <Maximize2 className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* THUMBNAIL STRIP */}
+      <div className="glass-card p-3 sm:p-4 rounded-2xl bg-white border-sky-100 shadow-sm">
+        <div className="flex items-center gap-2.5 overflow-x-auto pb-1 pt-1 no-scrollbar scroll-smooth">
+          {galleryImages.map((src, index) => (
+            <button
+              key={src}
+              onClick={() => setCurrentIndex(index)}
+              className={`relative aspect-video w-20 sm:w-28 shrink-0 rounded-xl overflow-hidden border-2 transition-all ${
+                currentIndex === index
+                  ? 'border-sky-500 ring-2 ring-sky-300 scale-105 shadow-md opacity-100'
+                  : 'border-transparent opacity-50 hover:opacity-100'
+              }`}
+            >
+              <Image
+                src={src}
+                alt={`Thumbnail ${index + 1}`}
+                fill
+                sizes="112px"
+                className="object-cover"
+                loading="lazy"
+              />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* TRUE FULLSCREEN MODAL (PORTAL TO DOCUMENT.BODY) */}
+      {isFullscreen && mounted && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[999999] w-screen h-screen bg-black flex items-center justify-center overflow-hidden animate-fadeIn">
+          
+          {/* CLOSE BUTTON */}
+          <button
+            onClick={closeFullscreen}
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 w-12 h-12 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center transition-all z-[1000000] border border-white/30 shadow-2xl hover:scale-110"
+            aria-label="Tutup Layar Penuh"
+          >
+            <X className="w-7 h-7" />
+          </button>
+
+          {/* PREV BUTTON */}
+          <button
+            onClick={prevSlide}
+            className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center transition-all z-[1000000] border border-white/20 shadow-2xl hover:scale-110"
+            aria-label="Foto Sebelumnya"
+          >
+            <ChevronLeft className="w-9 h-9" />
+          </button>
+
+          {/* NEXT BUTTON */}
+          <button
+            onClick={nextSlide}
+            className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center transition-all z-[1000000] border border-white/20 shadow-2xl hover:scale-110"
+            aria-label="Foto Selanjutnya"
+          >
+            <ChevronRight className="w-9 h-9" />
+          </button>
+
+          {/* FULL SCREEN IMAGE CONTAINER (100% WIDTH & 100% HEIGHT) */}
+          <div className="relative w-full h-full p-2 sm:p-8 flex items-center justify-center">
+            <Image
+              src={galleryImages[currentIndex]}
+              alt={`Foto Fullscreen ${currentIndex + 1}`}
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
+
+          {/* BOTTOM COUNTER */}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-5 py-2 rounded-full bg-black/70 text-white text-xs sm:text-sm font-bold border border-white/20 backdrop-blur-md shadow-2xl z-[1000000]">
+            {currentIndex + 1} / {galleryImages.length}
+          </div>
+        </div>,
+        document.body
+      )}
+
+    </div>
+  );
+}

@@ -127,60 +127,62 @@ export function generateHealthRecommendation(suhuObjek: number, bpm: number): He
 
   const categories: RecommendationCategory[] = [
     {
-      title: 'Hidrasi & Minuman',
+      title: 'Hidrasi & Kebutuhan Cairan',
       iconName: 'Droplet',
       items: isFever
         ? [
-            'Minum air putih minimal 2.5 - 3 Liter per hari untuk mencegah dehidrasi akibat demam.',
-            'Konsumsi air hangat atau teh herbal tanpa pemanis berlebihan.',
-            'Hindari minuman berkafein kencang dan es krim dingin saat demam.',
+            'Tingkatkan asupan air putih hingga 2.5 - 3 Liter per hari untuk mencegah dehidrasi saat demam.',
+            'Minum air putih hangat atau sup bernutrisi untuk membantu menurunkan suhu tubuh.',
+            'Hindari minuman berkafein tinggi atau minuman kemasan berpemanis berlebih.',
           ]
         : [
-            'Minum 8 gelas air putih (2 Liter) sepanjang hari.',
-            'Bawa botol minum sendiri saat bersekolah atau beraktivitas.',
-            'Kurangi minuman manis kemasan dan soda.',
+            'Minum minimal 8 gelas air putih (±2 Liter) per hari sesuai pedoman Germas Kemenkes.',
+            'Pastikan air minum tidak berbau, tidak berasa, dan tidak berwarna (bebas kuman).',
+            'Bawa botol minum pribadi saat beraktivitas di sekolah.',
           ],
     },
     {
-      title: 'Nutrisi & Makanan',
+      title: 'Nutrisi & Isi Piringku',
       iconName: 'Apple',
       items: isFever
         ? [
-            'Konsumsi makanan berkuah hangat seperti sup ayam gizi seimbang.',
-            'Perbanyak buah kaya Vitamin C (jeruk, pepaya, jambu biji).',
-            'Makan dalam porsi kecil namun sering jika nafsu makan turun.',
+            'Konsumsi makanan bergizi dalam porsi kecil tapi sering (sup ayam, bubur gandum, sayur bening).',
+            'Perbanyak buah kaya Vitamin C dan antioksidan (pepaya, jeruk, jambu biji).',
+            'Utamakan protein mudah dicerna seperti telur rebus dan tahu tempe.',
           ]
         : [
-            'Terapkan piring Isi Piringku: 50% buah & sayur, 50% makanan pokok & lauk.',
-            'Perbanyak konsumsi protein (telur, ikan, tahu, tempe) untuk pertumbuhan.',
-            'Batasi konsumsi gorengan dan makanan tinggi garam.',
+            'Terapkan porsi Isi Piringku: 2/3 karbohidrat + 1/3 protein pada 1/2 piring, dan 2/3 sayur + 1/3 buah pada 1/2 piring lainnya.',
+            'Kombinasikan protein hewani (ikan/ayam/telur) dan nabati (tempe/tahu) setiap kali makan.',
+            'Cukupi 150 gr sayuran (1 mangkok) dan 150 gr buah segar (2 potong pepaya / 2 jeruk) per hari.',
           ],
     },
     {
-      title: 'Istirahat & Tidur',
+      title: 'Pola Istirahat & Tidur',
       iconName: 'Moon',
       items: isFever || isHighBpm
         ? [
-            'Tidur cukup minimal 8-9 jam di malam hari agar daya tahan tubuh pulih.',
-            'Hindari begadang dan matikan layar gadget 30 menit sebelum tidur.',
-            'Istirahatkan tubuh dari aktivitas fisik berat sementara waktu.',
+            'Tidur cukup minimal 8-9 jam di malam hari agar sel tubuh beregenerasi optimal.',
+            'Matikan layar ponsel 30 menit sebelum tidur untuk merangsang melatonin alami.',
+            'Istirahatkan tubuh sepenuhnya (bed rest) dan hindari begadang.',
           ]
         : [
-            'Jaga pola tidur teratur jam 21.00 - 05.00 WIB.',
-            'Luangkan waktu 15 menit untuk relaksasi atau olahraga pernapasan.',
+            'Jaga pola tidur teratur 8-9 jam setiap malam (pukul 21.00 - 05.00 WIB).',
+            'Hindari konsumsi kopi atau minuman boba manis setelah pukul 16.00 sore.',
+            'Lakukan relaksasi dan peregangan sebelum tidur agar pikiran rileks.',
           ],
     },
     {
-      title: 'Aktivitas Fisik & Olahraga',
+      title: 'Aktivitas Fisik & CTPS',
       iconName: 'Activity',
       items: isFever
         ? [
-            'Hentikan sementara kegiatan olahraga berat.',
-            'Ganti dengan istirahat tirah baring (bed rest) sampai suhu tubuh stabil.',
+            'Hentikan aktivitas fisik berat sementara waktu hingga suhu tubuh normal stabil.',
+            'Lakukan 5 Langkah Cuci Tangan Pakai Sabun (CTPS) 20 detik sebelum & sesudah makan atau minum obat.',
           ]
         : [
-            'Lakukan aktivitas fisik ringan-sedang minimal 30 menit sehari (jalan santai, bersepeda).',
-            'Lakukan peregangan otot setelah duduk belajar dalam waktu lama.',
+            'Lakukan aktivitas fisik minimal 30 menit setiap hari (jalan cepat, bersepeda, senam, menyapu).',
+            'Peregangan otot ringan setiap 1-2 jam di sela waktu belajar.',
+            'Terapkan 5 Langkah Cuci Tangan Pakai Sabun (CTPS) dengan air mengalir 20 detik.',
           ],
     },
   ];

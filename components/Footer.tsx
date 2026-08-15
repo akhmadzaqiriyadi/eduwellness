@@ -64,11 +64,12 @@ export default function Footer() {
             <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider mb-3">Navigasi Utama</h4>
             <ul className="space-y-2 text-xs font-semibold">
               <li><Link href="/" className="hover:text-sky-600 inline-block py-0.5">Beranda</Link></li>
-              <li><Link href="/about" className="hover:text-sky-600 inline-block py-0.5">About Us (Tentang Aplikasi)</Link></li>
               <li><Link href="/edukasi" className="hover:text-sky-600 font-bold text-sky-600 inline-block py-0.5">Edukasi Kesehatan</Link></li>
               <li><Link href="/dashboard" className="hover:text-sky-600 inline-block py-0.5">IoT Live Dashboard</Link></li>
               <li><Link href="/rekomendasi" className="hover:text-sky-600 inline-block py-0.5">Rekomendasi Kesehatan</Link></li>
               <li><Link href="/riwayat" className="hover:text-sky-600 inline-block py-0.5">Riwayat Pengecekan</Link></li>
+              <li><Link href="/galeri" className="hover:text-sky-600 inline-block py-0.5">Galeri Dokumentasi</Link></li>
+              <li><Link href="/about" className="hover:text-sky-600 inline-block py-0.5">About Us (Tentang Aplikasi)</Link></li>
             </ul>
           </div>
 
