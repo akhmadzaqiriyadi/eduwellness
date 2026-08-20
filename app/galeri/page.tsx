@@ -253,16 +253,19 @@ export default function GaleriPage() {
 
       </div>
 
-      {/* SECTION 2: KAROSEL TAMPILAN WEB & PROTOTIPE (DI ATAS GALERI) */}
+      {/* SECTION 2: KAROSEL PENGEMBANGAN, PERANCANGAN & UJI COBA SISTEM */}
       <div className="space-y-6">
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-100 text-indigo-800 text-xs font-black border border-indigo-200">
             <Laptop className="w-4 h-4 text-indigo-600" />
-            <span>Tampilan Website & Prototipe EduWellness</span>
+            <span>Perancangan, Uji Coba & Implementasi Sistem</span>
           </div>
           <h2 className="text-2xl sm:text-4xl font-black text-slate-900">
-            Prototipe & <span className="text-gradient">Antarmuka Sistem</span>
+            Dokumentasi Riset & <span className="text-gradient">Pengembangan EduWellness</span>
           </h2>
+          <p className="text-xs sm:text-sm text-slate-500 max-w-2xl mx-auto">
+            Rangkaian tahapan mulai dari analisis kebutuhan, wawancara, perancangan prototipe IoT, uji fungsionalitas sensor, sosialisasi ke siswa, hingga testimoni pengguna.
+          </p>
         </div>
 
         {/* MAIN CAROUSEL 1 CONTAINER */}
@@ -271,7 +274,7 @@ export default function GaleriPage() {
             <Image
               key={prototipeImages[protoIndex]}
               src={prototipeImages[protoIndex]}
-              alt={`Prototipe Slide ${protoIndex + 1}`}
+              alt={`Dokumentasi Riset Slide ${protoIndex + 1}`}
               fill
               priority
               sizes="(max-width: 1400px) 100vw, 1400px"
@@ -337,7 +340,7 @@ export default function GaleriPage() {
               >
                 <Image
                   src={src}
-                  alt={`Thumbnail Prototipe ${index + 1}`}
+                  alt={`Thumbnail Riset ${index + 1}`}
                   fill
                   sizes="112px"
                   className="object-cover"
@@ -354,11 +357,14 @@ export default function GaleriPage() {
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-100 text-sky-700 text-xs font-extrabold border border-sky-200">
             <Images className="w-4 h-4 text-sky-500" />
-            <span>Dokumentasi Kegiatan Siswa</span>
+            <span>Dokumentasi Lapangan & Interaksi Siswa</span>
           </div>
           <h2 className="text-2xl sm:text-4xl font-black text-slate-900">
-            Galeri Foto <span className="text-gradient">EduWellness</span>
+            Galeri Kegiatan <span className="text-gradient">EduWellness di Sekolah</span>
           </h2>
+          <p className="text-xs sm:text-sm text-slate-500 max-w-2xl mx-auto">
+            Momen interaksi siswa, pelatihan duta kesehatan, pengukuran denyut nadi & suhu tubuh berkala di SMP N 1 Seyegan.
+          </p>
         </div>
 
         {/* MAIN CAROUSEL 2 CONTAINER */}
