@@ -142,11 +142,11 @@ export default function GaleriPage() {
           </a>
         </div>
 
-        {/* 16:9 YOUTUBE EMBED PLAYER */}
-        <div className="relative aspect-video w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-800 bg-black">
+        {/* 16:9 SEAMLESS AUTOPLAY YOUTUBE PLAYER */}
+        <div className="relative aspect-video w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl bg-black border border-slate-800/80">
           <iframe
-            src="https://www.youtube.com/embed/3X4aQhXwTU8?rel=0&modestbranding=1"
-            title="EduWellness: Teknologi untuk Menumbuhkan Literasi Kesehatan Siswa"
+            src="https://www.youtube-nocookie.com/embed/3X4aQhXwTU8?autoplay=1&mute=1&loop=1&playlist=3X4aQhXwTU8&controls=1&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3"
+            title="EduWellness: Video Profil & Demonstrasi"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
             className="w-full h-full border-0"
