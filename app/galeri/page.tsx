@@ -10,7 +10,10 @@ import {
   Pause, 
   Maximize2, 
   X,
-  Images
+  Images,
+  Video,
+  Sparkles,
+  ExternalLink
 } from 'lucide-react';
 
 const galleryImages = [
@@ -117,21 +120,93 @@ export default function GaleriPage() {
   }, [isFullscreen]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-8 sm:space-y-12">
       
-      {/* HEADER SIMPLE */}
-      <div className="text-center space-y-2">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-100 text-sky-700 text-xs font-extrabold border border-sky-200">
-          <Images className="w-4 h-4 text-sky-500" />
-          <span>Galeri Foto</span>
+      {/* SECTION 1: VIDEO YOUTUBE & CAPTION RESMI */}
+      <div className="glass-card p-6 sm:p-10 rounded-3xl bg-white border-sky-100 shadow-xl shadow-sky-500/5 space-y-6">
+        
+        {/* HEADER VIDEO */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-sky-50 pb-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-100 text-rose-700 text-xs font-black border border-rose-200">
+            <Video className="w-4 h-4 text-rose-600" />
+            <span>Video Profil & Demonstrasi</span>
+          </div>
+          <a
+            href="https://www.youtube.com/watch?v=3X4aQhXwTU8"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-rose-600 transition-colors"
+          >
+            <span>Tonton di YouTube</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
         </div>
-        <h1 className="text-2xl sm:text-4xl font-black text-slate-900">
-          Galeri <span className="text-gradient">EduWellness</span>
-        </h1>
+
+        {/* 16:9 YOUTUBE EMBED PLAYER */}
+        <div className="relative aspect-video w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-800 bg-black">
+          <iframe
+            src="https://www.youtube.com/embed/3X4aQhXwTU8?rel=0&modestbranding=1"
+            title="EduWellness: Teknologi untuk Menumbuhkan Literasi Kesehatan Siswa"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            className="w-full h-full border-0"
+          />
+        </div>
+
+        {/* CAPTION & DESKRIPSI LENGKAP */}
+        <div className="space-y-4 pt-2">
+          <h2 className="text-xl sm:text-3xl font-black text-slate-900 leading-tight">
+            EduWellness: <span className="text-sky-600">Teknologi untuk Menumbuhkan Literasi Kesehatan Siswa</span>
+          </h2>
+
+          <div className="space-y-3.5 text-xs sm:text-sm text-slate-600 leading-relaxed">
+            <p>
+              Di era digital, literasi kesehatan menjadi semakin penting. Siswa tidak hanya membutuhkan informasi kesehatan yang benar, tetapi juga perlu memiliki kemampuan untuk memahami, memantau, dan menerapkan kebiasaan hidup sehat dalam kehidupan sehari-hari.
+            </p>
+
+            <p>
+              Berangkat dari kebutuhan tersebut, hadir <strong>EduWellness</strong>, sebuah inovasi aplikasi web berbasis IoT yang mengintegrasikan sensor suhu tubuh dan detak jantung sebagai media pembelajaran dan pemantauan kesehatan siswa.
+            </p>
+
+            <p>
+              Prototipe EduWellness dirancang dalam bentuk perangkat pemantau kesehatan yang terhubung dengan website. Melalui website EduWellness, siswa dapat memperoleh edukasi kesehatan, melihat status kesehatan secara real-time, mendapatkan rekomendasi kebiasaan hidup sehat, serta mengakses riwayat dan berbagai informasi pendukung kesehatan.
+            </p>
+          </div>
+
+          {/* HIGHLIGHT CALLOUT BOX */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-sky-50 to-indigo-50 border border-sky-100 space-y-2">
+            <p className="text-xs sm:text-sm font-bold text-slate-800 flex items-start gap-2">
+              <Sparkles className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
+              <span>EduWellness bukan sekadar teknologi, tetapi sebuah langkah kecil menuju generasi yang lebih sadar, peduli, dan cerdas dalam menjaga kesehatan.</span>
+            </p>
+            <p className="text-xs sm:text-sm font-semibold text-slate-700">
+              🎬 Saksikan video ini untuk melihat latar belakang, prototipe, serta website EduWellness secara lebih dekat.
+            </p>
+            <p className="text-xs sm:text-sm font-extrabold text-sky-700 italic pt-1">
+              Selamat menyaksikan! ✨
+            </p>
+          </div>
+
+        </div>
+
       </div>
 
-      {/* MAIN CAROUSEL CONTAINER (FULL 16:9 FRAME) */}
-      <div className="relative glass-card rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl">
+      {/* SECTION 2: DOKUMENTASI FOTO KEGIATAN */}
+      <div className="space-y-6">
+        
+        {/* HEADER DOKUMENTASI */}
+        <div className="text-center space-y-2 pt-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-100 text-sky-700 text-xs font-extrabold border border-sky-200">
+            <Images className="w-4 h-4 text-sky-500" />
+            <span>Dokumentasi Kegiatan Siswa</span>
+          </div>
+          <h2 className="text-2xl sm:text-4xl font-black text-slate-900">
+            Galeri Foto <span className="text-gradient">EduWellness</span>
+          </h2>
+        </div>
+
+        {/* MAIN CAROUSEL CONTAINER (FULL 16:9 FRAME) */}
+        <div className="relative glass-card rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl">
         
         {/* 16:9 VIEWPORT FULLY COVERED */}
         <div className="relative aspect-video w-full overflow-hidden flex items-center justify-center bg-slate-950">
@@ -214,6 +289,8 @@ export default function GaleriPage() {
             </button>
           ))}
         </div>
+      </div>
+
       </div>
 
       {/* TRUE FULLSCREEN MODAL (PORTAL TO DOCUMENT.BODY) */}
