@@ -125,21 +125,27 @@ export default function GaleriPage() {
       {/* SECTION 1: VIDEO YOUTUBE & CAPTION RESMI */}
       <div className="glass-card p-6 sm:p-10 rounded-3xl bg-white border-sky-100 shadow-xl shadow-sky-500/5 space-y-6">
         
-        {/* HEADER VIDEO */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-sky-50 pb-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-100 text-rose-700 text-xs font-black border border-rose-200">
-            <Video className="w-4 h-4 text-rose-600" />
-            <span>Video Profil & Demonstrasi</span>
+        {/* HEADER & JUDUL DI ATAS VIDEO */}
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-sky-50 pb-3">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-100 text-rose-700 text-xs font-black border border-rose-200">
+              <Video className="w-4 h-4 text-rose-600" />
+              <span>Video Profil & Demonstrasi</span>
+            </div>
+            <a
+              href="https://www.youtube.com/watch?v=3X4aQhXwTU8"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-rose-600 transition-colors"
+            >
+              <span>Tonton di YouTube</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
           </div>
-          <a
-            href="https://www.youtube.com/watch?v=3X4aQhXwTU8"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-rose-600 transition-colors"
-          >
-            <span>Tonton di YouTube</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </a>
+
+          <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-slate-900 leading-tight">
+            EduWellness: <span className="text-sky-600">Teknologi untuk Menumbuhkan Literasi Kesehatan Siswa</span>
+          </h2>
         </div>
 
         {/* 16:9 SEAMLESS AUTOPLAY YOUTUBE PLAYER */}
@@ -154,11 +160,7 @@ export default function GaleriPage() {
         </div>
 
         {/* CAPTION & DESKRIPSI LENGKAP */}
-        <div className="space-y-4 pt-2">
-          <h2 className="text-xl sm:text-3xl font-black text-slate-900 leading-tight">
-            EduWellness: <span className="text-sky-600">Teknologi untuk Menumbuhkan Literasi Kesehatan Siswa</span>
-          </h2>
-
+        <div className="space-y-4 pt-1">
           <div className="space-y-3.5 text-xs sm:text-sm text-slate-600 leading-relaxed">
             <p>
               Di era digital, literasi kesehatan menjadi semakin penting. Siswa tidak hanya membutuhkan informasi kesehatan yang benar, tetapi juga perlu memiliki kemampuan untuk memahami, memantau, dan menerapkan kebiasaan hidup sehat dalam kehidupan sehari-hari.
