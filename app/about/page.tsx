@@ -31,21 +31,21 @@ export default function AboutPage() {
       name: 'Prima Mega Jaya, S.Pd',
       role: 'Design UI/UX & Prompting AI',
       desc: 'Merancang antarmuka aplikasi yang intuitif, ramah remaja Gen Z, serta mengoptimalkan alur kecerdasan buatan.',
-      color: 'from-sky-500 to-blue-600',
+      image: '/team/prima.webp',
       badgeBg: 'bg-sky-50 text-sky-700 border-sky-200',
     },
     {
       name: 'Shafa Prasetyaningtyas',
       role: 'Backend, Database, Hardware & Prompting AI',
       desc: 'Mengembangkan arsitektur backend, integrasi basis data Supabase, serta pemrograman mikrokontroler sensor IoT.',
-      color: 'from-amber-500 to-orange-600',
+      image: '/team/shafa.webp',
       badgeBg: 'bg-amber-50 text-amber-700 border-amber-200',
     },
     {
       name: 'Nabila Aqila Putri',
       role: 'Frontend Hardware & Prompting AI',
       desc: 'Membangun antarmuka dinamis Next.js, menghubungkan komunikasi data sensor hardware ke aplikasi web real-time.',
-      color: 'from-emerald-500 to-teal-600',
+      image: '/team/nabila.webp',
       badgeBg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     },
   ];
@@ -225,16 +225,27 @@ export default function AboutPage() {
           <p className="text-slate-600 text-xs sm:text-sm">Kolaborasi tim yang mengembangkan EduWellness IoT Health Education</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+        {/* 3:4 INDIVIDUAL MEMBER CARDS */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           {teamMembers.map((member, idx) => (
-            <div key={idx} className="glass-card p-5 sm:p-6 rounded-3xl bg-white border-sky-100 space-y-4 shadow-md flex flex-col justify-between relative overflow-hidden group">
-              <div className="space-y-3">
-                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${member.color} text-white flex items-center justify-center font-black text-xl shadow-md`}>
-                  {member.name.charAt(0)}
-                </div>
+            <div key={idx} className="glass-card p-4 sm:p-5 rounded-3xl bg-white border-sky-100 space-y-4 shadow-md flex flex-col justify-between relative overflow-hidden group hover:shadow-xl hover:border-sky-300 transition-all">
+              
+              {/* 3:4 RATIO PORTRAIT PHOTO */}
+              <div className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden bg-slate-100 shadow-inner border border-slate-100">
+                <Image
+                  src={member.image}
+                  alt={member.name}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+
+              {/* INFO */}
+              <div className="space-y-2.5">
                 <div>
-                  <h3 className="text-base sm:text-lg font-extrabold text-slate-900">{member.name}</h3>
-                  <span className={`inline-block px-3 py-1 rounded-full text-[11px] font-extrabold border mt-1 ${member.badgeBg}`}>
+                  <h3 className="text-base sm:text-lg font-extrabold text-slate-900 leading-snug">{member.name}</h3>
+                  <span className={`inline-block px-3 py-1 rounded-full text-[11px] font-extrabold border mt-1.5 ${member.badgeBg}`}>
                     {member.role}
                   </span>
                 </div>
@@ -244,6 +255,30 @@ export default function AboutPage() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* 16:9 FULL TEAM GROUP PHOTO (DI BAGIAN BAWAH) */}
+        <div className="glass-card p-4 sm:p-6 rounded-3xl bg-white border-sky-100 shadow-md space-y-3">
+          <div className="flex items-center justify-between gap-2 px-1">
+            <div className="flex items-center gap-2 text-xs sm:text-sm font-extrabold text-slate-800">
+              <Users className="w-4 h-4 text-sky-500" />
+              <span>Foto Bersama Tim Pengembang EduWellness</span>
+            </div>
+            <span className="text-[11px] font-bold text-sky-600 bg-sky-50 px-3 py-1 rounded-full border border-sky-200">
+              SMP N 1 SEYEGAN
+            </span>
+          </div>
+
+          <div className="relative aspect-video w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg bg-slate-900 border border-slate-200">
+            <Image
+              src="/team/team.webp"
+              alt="Foto Bersama Tim Pengembang EduWellness"
+              fill
+              sizes="(max-width: 1200px) 100vw, 1200px"
+              className="object-cover hover:scale-102 transition-transform duration-700"
+              priority
+            />
+          </div>
         </div>
       </section>
 
