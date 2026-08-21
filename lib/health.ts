@@ -23,6 +23,7 @@ export interface HealthRecommendation {
 
 /**
  * Returns temperature status object given body temperature in °C.
+ * Adjusted for non-contact MLX90614 infrared skin surface readings (Normal: 30.5°C - 37.4°C).
  */
 export function getTemperatureStatus(suhuObjek: number): HealthStatusResult {
   if (suhuObjek >= 37.5) {
@@ -34,7 +35,7 @@ export function getTemperatureStatus(suhuObjek: number): HealthStatusResult {
       badgeBorder: 'border-amber-200',
     };
   }
-  if (suhuObjek < 35.0) {
+  if (suhuObjek > 0 && suhuObjek < 30.0) {
     return {
       text: 'Hipotermia',
       color: 'text-sky-700 bg-sky-50 border-sky-200',
@@ -97,7 +98,7 @@ export function getBpmStatus(bpm: number): HealthStatusResult {
  */
 export function generateHealthRecommendation(suhuObjek: number, bpm: number): HealthRecommendation {
   const isFever = suhuObjek >= 37.5;
-  const isHypo = suhuObjek < 35.0;
+  const isHypo = suhuObjek > 0 && suhuObjek < 30.0;
   const isHighBpm = bpm > 100;
   const isLowBpm = bpm > 0 && bpm < 50;
 

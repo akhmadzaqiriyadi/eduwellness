@@ -108,26 +108,39 @@ export default function RiwayatPage() {
     }
   }, []);
 
+  // NORMALIZED HEALTH STATUS HELPER (Skin surface temp MLX90614: 30.5°C - 37.4°C is Normal)
+  const getNormalizedStatus = (record: HealthCheckRecord) => {
+    if (record.suhu_objek >= 37.5) return 'Demam';
+    if (record.suhu_objek > 0 && record.suhu_objek < 30.0) return 'Hipotermia / Suhu Rendah';
+    if (record.bpm > 100) return 'Takikardia (Denyut Tinggi)';
+    return 'Normal';
+  };
+
   // FILTER & SEARCH LOGIC
   const filteredHistory = history.filter((record) => {
     const q = searchQuery.toLowerCase();
+    const currentStatus = getNormalizedStatus(record);
+
     const matchesQuery = 
       (record.user_email?.toLowerCase().includes(q) || false) ||
+      (currentStatus.toLowerCase().includes(q)) ||
       (record.status_kesehatan?.toLowerCase().includes(q) || false) ||
       (new Date(record.created_at || Date.now()).toLocaleString('id-ID').toLowerCase().includes(q));
 
     // Status Filter
     const matchesStatusFilter = 
-      statusFilter === 'Semua' || record.status_kesehatan.includes(statusFilter);
+      statusFilter === 'Semua' || 
+      currentStatus.includes(statusFilter) || 
+      record.status_kesehatan.includes(statusFilter);
 
     // User Quick Category Filter
     let matchesQuickCategory = true;
     if (quickFilterCategory === 'Peringatan') {
-      matchesQuickCategory = record.status_kesehatan.includes('Demam') || 
-                             record.status_kesehatan.includes('Hipotermia') || 
-                             record.status_kesehatan.includes('Tinggi');
+      matchesQuickCategory = currentStatus.includes('Demam') || 
+                             currentStatus.includes('Hipotermia') || 
+                             currentStatus.includes('Tinggi');
     } else if (quickFilterCategory === 'Normal') {
-      matchesQuickCategory = record.status_kesehatan.includes('Normal');
+      matchesQuickCategory = currentStatus.includes('Normal');
     }
 
     return matchesQuery && matchesStatusFilter && matchesQuickCategory;
@@ -449,15 +462,22 @@ export default function RiwayatPage() {
                       </td>
 
                       <td className="py-3.5 px-3 sm:px-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full font-bold text-[11px] ${
-                          record.status_kesehatan.includes('Demam') || record.status_kesehatan.includes('Tinggi')
-                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                            : record.status_kesehatan.includes('Hipotermia')
-                            ? 'bg-sky-50 text-sky-700 border border-sky-200'
-                            : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                        }`}>
-                          {record.status_kesehatan}
-                        </span>
+                        {(() => {
+                          const normalized = getNormalizedStatus(record);
+                          const isWarning = normalized.includes('Demam') || normalized.includes('Tinggi');
+                          const isCold = normalized.includes('Hipotermia') || normalized.includes('Rendah');
+                          return (
+                            <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full font-bold text-[11px] ${
+                              isWarning
+                                ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                : isCold
+                                ? 'bg-sky-50 text-sky-700 border border-sky-200'
+                                : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            }`}>
+                              {normalized}
+                            </span>
+                          );
+                        })()}
                       </td>
                     </tr>
                   ))}
