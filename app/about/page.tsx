@@ -147,47 +147,57 @@ export default function AboutPage() {
         </p>
       </section>
 
-      {/* VISI & MISI */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-        {/* VISI */}
-        <div className="glass-card p-6 sm:p-8 rounded-3xl bg-white border-sky-100 space-y-4 shadow-md flex flex-col justify-between">
-          <div className="space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-sky-50 flex items-center justify-center text-sky-600 border border-sky-100">
-              <Target className="w-6 h-6" />
-            </div>
-            <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900">Visi</h3>
+      {/* VISI & MISI (MODE VERTIKAL KOMPAK & RAPI) */}
+      <section className="glass-card p-5 sm:p-7 rounded-3xl bg-white border-sky-100 shadow-md space-y-5">
+        
+        {/* VISI (KOMPAK) */}
+        <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 p-4 rounded-2xl bg-gradient-to-r from-sky-50/70 to-blue-50/50 border border-sky-100/80">
+          <div className="w-10 h-10 rounded-xl bg-sky-500 text-white flex items-center justify-center shrink-0 shadow-sm shadow-sky-500/20">
+            <Target className="w-5 h-5" />
+          </div>
+          <div className="space-y-1">
+            <h3 className="text-sm sm:text-base font-extrabold text-slate-900 flex items-center gap-1.5">
+              <span>Visi EduWellness</span>
+            </h3>
             <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
-              Menjadi solusi digital kesehatan berbasis IoT yang mengintegrasikan pemantauan kondisi kesehatan secara real-time dengan edukasi kesehatan interaktif guna menciptakan generasi yang sehat, sadar akan pentingnya menjaga kesehatan, serta mampu menerapkan pola hidup sehat dalam kehidupan sehari-hari.
+              Menjadi solusi digital kesehatan berbasis IoT yang mengintegrasikan pemantauan kondisi kesehatan secara real-time dengan edukasi interaktif guna mewujudkan remaja yang sadar, peduli, dan konsisten menerapkan pola hidup sehat.
             </p>
           </div>
         </div>
 
-        {/* MISI */}
-        <div className="glass-card p-6 sm:p-8 rounded-3xl bg-white border-sky-100 space-y-4 shadow-md">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100">
-            <Compass className="w-6 h-6" />
+        {/* MISI (GRID 2 KOLOM RAMPING) */}
+        <div className="space-y-3 pt-1">
+          <div className="flex items-center gap-2 text-slate-900 font-extrabold text-xs sm:text-sm">
+            <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+              <Compass className="w-4 h-4" />
+            </div>
+            <span>Misi EduWellness</span>
           </div>
-          <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900">Misi</h3>
-          <ul className="space-y-2.5 text-xs sm:text-sm text-slate-600">
-            <li className="flex items-start gap-2.5">
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 text-xs sm:text-sm text-slate-600">
+            <div className="flex items-start gap-2 p-3 rounded-xl bg-slate-50 border border-slate-100">
               <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-              <span>Menyediakan pemantauan kesehatan secara real-time melalui perangkat IoT.</span>
-            </li>
-            <li className="flex items-start gap-2.5">
+              <span className="leading-snug">Menyediakan pemantauan suhu & detak jantung real-time berbasis IoT.</span>
+            </div>
+
+            <div className="flex items-start gap-2 p-3 rounded-xl bg-slate-50 border border-slate-100">
               <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-              <span>Menyajikan informasi kesehatan yang akurat dan mudah dipahami oleh remaja.</span>
-            </li>
-            <li className="flex items-start gap-2.5">
+              <span className="leading-snug">Menyajikan edukasi kesehatan interaktif yang akurat dan ramah remaja.</span>
+            </div>
+
+            <div className="flex items-start gap-2 p-3 rounded-xl bg-slate-50 border border-slate-100">
               <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-              <span>Mendorong penerapan gaya hidup sehat sejak usia remaja secara konsisten.</span>
-            </li>
-            <li className="flex items-start gap-2.5">
+              <span className="leading-snug">Mendorong kebiasaan gaya hidup sehat dan pencegahan penyakit sejak dini.</span>
+            </div>
+
+            <div className="flex items-start gap-2 p-3 rounded-xl bg-slate-50 border border-slate-100">
               <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-              <span>Mendukung program kesehatan sekolah melalui pemanfaatan teknologi digital terintegrasi.</span>
-            </li>
-          </ul>
+              <span className="leading-snug">Mendukung program kesehatan sekolah melalui teknologi digital terpadu.</span>
+            </div>
+          </div>
         </div>
-      </div>
+
+      </section>
 
       {/* FITUR UNGGULAN & KEUNGGULAN APLIKASI */}
       <section className="space-y-6 sm:space-y-8">
