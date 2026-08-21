@@ -106,12 +106,14 @@ export default function GaleriPage() {
     return () => clearTimeout(timer);
   }, [protoIsPlaying, protoIndex, nextProto]);
 
-  // Scroll active thumbnail smoothly for Proto
+  // Scroll active thumbnail smoothly inside its own strip ONLY (NEVER scroll the page window)
   useEffect(() => {
     if (protoThumbRef.current) {
-      const activeEl = protoThumbRef.current.children[protoIndex] as HTMLElement;
+      const container = protoThumbRef.current;
+      const activeEl = container.children[protoIndex] as HTMLElement;
       if (activeEl) {
-        activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        const scrollTarget = activeEl.offsetLeft - (container.clientWidth / 2) + (activeEl.clientWidth / 2);
+        container.scrollTo({ left: Math.max(0, scrollTarget), behavior: 'smooth' });
       }
     }
   }, [protoIndex]);
@@ -131,12 +133,14 @@ export default function GaleriPage() {
     return () => clearInterval(timer);
   }, [galleryIsPlaying, nextGallery]);
 
-  // Scroll active thumbnail smoothly for Gallery
+  // Scroll active thumbnail smoothly inside its own strip ONLY (NEVER scroll the page window)
   useEffect(() => {
     if (galleryThumbRef.current) {
-      const activeEl = galleryThumbRef.current.children[galleryIndex] as HTMLElement;
+      const container = galleryThumbRef.current;
+      const activeEl = container.children[galleryIndex] as HTMLElement;
       if (activeEl) {
-        activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        const scrollTarget = activeEl.offsetLeft - (container.clientWidth / 2) + (activeEl.clientWidth / 2);
+        container.scrollTo({ left: Math.max(0, scrollTarget), behavior: 'smooth' });
       }
     }
   }, [galleryIndex]);
@@ -430,7 +434,7 @@ export default function GaleriPage() {
             <span>Dokumentasi Lapangan & Interaksi Siswa</span>
           </div>
           <h2 className="text-2xl sm:text-4xl font-black text-slate-900">
-            Galeri Kegiatan <span className="text-gradient">EduWellness di Sekolah</span>
+            Galeri <span className="text-gradient">EduWellness</span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 max-w-2xl mx-auto">
             Momen interaksi siswa, pelatihan duta kesehatan, pengukuran denyut nadi & suhu tubuh berkala di SMP N 1 Seyegan.
