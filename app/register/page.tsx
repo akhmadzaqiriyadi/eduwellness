@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Mail, Lock, User, UserPlus, CheckCircle2, AlertCircle, Sparkles, Heart, School, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { saveSession } from '@/lib/auth';
+import { saveSession, registerLocalAccount } from '@/lib/auth';
 import CustomSelect from '@/components/CustomSelect';
 
 export default function RegisterPage() {
@@ -30,33 +30,65 @@ export default function RegisterPage() {
     const cleanEmail = email.trim().toLowerCase();
     const cleanName = fullName.trim();
 
-    try {
-      if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://your-supabase-project.supabase.co') {
-        const { error } = await supabase.auth.signUp({
-          email: cleanEmail,
-          password,
-          options: {
-            data: {
-              full_name: cleanName,
-              school: school,
-              grade: grade,
-            },
-          },
-        });
+    if (!password || password.length < 6) {
+      setErrorMsg('❌ Kata sandi minimal 6 karakter!');
+      setLoading(false);
+      return;
+    }
 
-        if (error) {
-          console.warn('Supabase Auth SignUp notice:', error.message);
+    try {
+      // 1. Save to Persistent Local Accounts Registry
+      registerLocalAccount(cleanEmail, password, cleanName, school, grade, 'user');
+
+      // 2. Sync to Supabase users table via API
+      try {
+        await fetch('/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: cleanEmail,
+            full_name: cleanName,
+            school: school,
+            grade: grade,
+            role: 'user',
+          }),
+        });
+      } catch (apiErr) {
+        console.warn('API users sync notice:', apiErr);
+      }
+
+      // 3. Attempt Supabase Auth SignUp
+      if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://your-supabase-project.supabase.co') {
+        try {
+          const { error } = await supabase.auth.signUp({
+            email: cleanEmail,
+            password,
+            options: {
+              data: {
+                full_name: cleanName,
+                school: school,
+                grade: grade,
+              },
+            },
+          });
+          if (error) {
+            console.warn('Supabase Auth SignUp notice:', error.message);
+          }
+        } catch (authErr) {
+          console.warn('Supabase Auth exception:', authErr);
         }
       }
 
+      // 4. Save Session
       saveSession(cleanEmail, 'user', cleanName, school, grade);
 
-      setSuccessMsg('Pendaftaran berhasil! Akun tersimpan di Supabase DB. Mengalihkan...');
+      setSuccessMsg('Pendaftaran berhasil! Akun Anda aktif dan tersimpan. Mengalihkan...');
       setTimeout(() => {
         router.push('/dashboard');
       }, 800);
     } catch (err: any) {
-      console.warn('Supabase SignUp error, fallback to instant session:', err);
+      console.warn('Registration fallback handler:', err);
+      registerLocalAccount(cleanEmail, password, cleanName, school, grade, 'user');
       saveSession(cleanEmail, 'user', cleanName, school, grade);
 
       setSuccessMsg('Pendaftaran berhasil! Mengalihkan ke IoT Dashboard...');
