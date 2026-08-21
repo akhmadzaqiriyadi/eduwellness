@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { 
@@ -68,15 +68,20 @@ const galleryImages = [
 ];
 
 export default function GaleriPage() {
-  // STATE CAROUSEL 1: TAMPILAN WEB & PROTOTIPE
+  // STATE CAROUSEL 1: RISSET & PROTOTIPE
   const [protoIndex, setProtoIndex] = useState(0);
   const [protoIsPlaying, setProtoIsPlaying] = useState(true);
   const [protoFullscreen, setProtoFullscreen] = useState(false);
+  const protoThumbRef = useRef<HTMLDivElement>(null);
 
-  // STATE CAROUSEL 2: DOKUMENTASI KEGIATAN
+  // STATE CAROUSEL 2: DOKUMENTASI SISWA
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [galleryIsPlaying, setGalleryIsPlaying] = useState(true);
   const [galleryFullscreen, setGalleryFullscreen] = useState(false);
+  const galleryThumbRef = useRef<HTMLDivElement>(null);
+
+  // TOUCH SWIPE STATES
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   const [mounted, setMounted] = useState(false);
 
@@ -101,6 +106,16 @@ export default function GaleriPage() {
     return () => clearTimeout(timer);
   }, [protoIsPlaying, protoIndex, nextProto]);
 
+  // Scroll active thumbnail smoothly for Proto
+  useEffect(() => {
+    if (protoThumbRef.current) {
+      const activeEl = protoThumbRef.current.children[protoIndex] as HTMLElement;
+      if (activeEl) {
+        activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }
+  }, [protoIndex]);
+
   // --- CAROUSEL 2 HANDLERS (GALLERY) ---
   const nextGallery = useCallback(() => {
     setGalleryIndex((prev) => (prev + 1) % galleryImages.length);
@@ -115,6 +130,16 @@ export default function GaleriPage() {
     const timer = setInterval(nextGallery, 3500);
     return () => clearInterval(timer);
   }, [galleryIsPlaying, nextGallery]);
+
+  // Scroll active thumbnail smoothly for Gallery
+  useEffect(() => {
+    if (galleryThumbRef.current) {
+      const activeEl = galleryThumbRef.current.children[galleryIndex] as HTMLElement;
+      if (activeEl) {
+        activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }
+  }, [galleryIndex]);
 
   // Fullscreen helpers
   const openFullscreenProto = () => {
@@ -158,6 +183,14 @@ export default function GaleriPage() {
         closeFullscreenProto();
         closeFullscreenGallery();
       }
+      if (e.key === 'ArrowRight') {
+        if (protoFullscreen) nextProto();
+        if (galleryFullscreen) nextGallery();
+      }
+      if (e.key === 'ArrowLeft') {
+        if (protoFullscreen) prevProto();
+        if (galleryFullscreen) prevGallery();
+      }
     };
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     window.addEventListener('keydown', handleKeyDown);
@@ -165,7 +198,7 @@ export default function GaleriPage() {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [protoFullscreen, galleryFullscreen, nextProto, prevProto, nextGallery, prevGallery]);
 
   // Lock body scroll when any fullscreen is active
   useEffect(() => {
@@ -178,6 +211,30 @@ export default function GaleriPage() {
       document.body.style.overflow = '';
     };
   }, [protoFullscreen, galleryFullscreen]);
+
+  // Touch Swipe Handlers for Proto
+  const handleTouchStartProto = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+  const handleTouchEndProto = (e: React.TouchEvent) => {
+    if (touchStartX === null) return;
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (diff > 50) nextProto();
+    if (diff < -50) prevProto();
+    setTouchStartX(null);
+  };
+
+  // Touch Swipe Handlers for Gallery
+  const handleTouchStartGallery = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+  const handleTouchEndGallery = (e: React.TouchEvent) => {
+    if (touchStartX === null) return;
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (diff > 50) nextGallery();
+    if (diff < -50) prevGallery();
+    setTouchStartX(null);
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-10 sm:space-y-16">
@@ -268,23 +325,36 @@ export default function GaleriPage() {
           </p>
         </div>
 
-        {/* MAIN CAROUSEL 1 CONTAINER */}
-        <div className="relative glass-card rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl">
-          <div className="relative aspect-video w-full overflow-hidden flex items-center justify-center bg-slate-950">
-            <Image
-              key={prototipeImages[protoIndex]}
-              src={prototipeImages[protoIndex]}
-              alt={`Dokumentasi Riset Slide ${protoIndex + 1}`}
-              fill
-              priority
-              sizes="(max-width: 1400px) 100vw, 1400px"
-              className="object-cover transition-opacity duration-300 animate-fadeIn"
-            />
+        {/* MAIN CAROUSEL 1 CONTAINER (ULTRA SMOOTH CONTINUOUS SLIDING TRACK) */}
+        <div 
+          className="relative glass-card rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl select-none"
+          onTouchStart={handleTouchStartProto}
+          onTouchEnd={handleTouchEndProto}
+        >
+          <div className="relative aspect-video w-full overflow-hidden bg-slate-950">
+            {/* CONTINUOUS SMOOTH TRACK */}
+            <div 
+              className="flex w-full h-full transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] will-change-transform"
+              style={{ transform: `translateX(-${protoIndex * 100}%)` }}
+            >
+              {prototipeImages.map((src, index) => (
+                <div key={src} className="relative aspect-video w-full h-full shrink-0">
+                  <Image
+                    src={src}
+                    alt={`Dokumentasi Riset Slide ${index + 1}`}
+                    fill
+                    priority={index === 0 || Math.abs(protoIndex - index) <= 1}
+                    sizes="(max-width: 1400px) 100vw, 1400px"
+                    className="object-cover"
+                  />
+                </div>
+              ))}
+            </div>
 
             {/* LEFT ARROW */}
             <button
               onClick={prevProto}
-              className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-black/60 hover:bg-black/85 text-white backdrop-blur-md flex items-center justify-center transition-all border border-white/20 shadow-xl hover:scale-105"
+              className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-md flex items-center justify-center transition-all border border-white/20 shadow-xl hover:scale-110 active:scale-95 z-20"
               aria-label="Slide Sebelumnya"
             >
               <ChevronLeft className="w-7 h-7" />
@@ -293,29 +363,29 @@ export default function GaleriPage() {
             {/* RIGHT ARROW */}
             <button
               onClick={nextProto}
-              className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-black/60 hover:bg-black/85 text-white backdrop-blur-md flex items-center justify-center transition-all border border-white/20 shadow-xl hover:scale-105"
+              className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-md flex items-center justify-center transition-all border border-white/20 shadow-xl hover:scale-110 active:scale-95 z-20"
               aria-label="Slide Selanjutnya"
             >
               <ChevronRight className="w-7 h-7" />
             </button>
 
             {/* TOP CONTROLS & COUNTER */}
-            <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none">
-              <span className="px-3.5 py-1.5 rounded-full bg-black/70 text-white text-xs font-black backdrop-blur-md border border-white/20 pointer-events-auto shadow-md">
+            <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none z-20">
+              <span className="px-3.5 py-1.5 rounded-full bg-black/75 text-white text-xs font-black backdrop-blur-md border border-white/20 pointer-events-auto shadow-lg">
                 {protoIndex + 1} / {prototipeImages.length}
               </span>
 
               <div className="flex items-center gap-2 pointer-events-auto">
                 <button
                   onClick={() => setProtoIsPlaying(!protoIsPlaying)}
-                  className="w-9 h-9 rounded-full bg-black/70 hover:bg-black text-white backdrop-blur-md flex items-center justify-center transition-all border border-white/20 shadow-md"
+                  className="w-9 h-9 rounded-full bg-black/75 hover:bg-black text-white backdrop-blur-md flex items-center justify-center transition-all border border-white/20 shadow-lg hover:scale-105"
                   aria-label={protoIsPlaying ? 'Jeda Slideshow' : 'Putar Slideshow'}
                 >
                   {protoIsPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
                 </button>
                 <button
                   onClick={openFullscreenProto}
-                  className="w-9 h-9 rounded-full bg-black/70 hover:bg-black text-white backdrop-blur-md flex items-center justify-center transition-all border border-white/20 shadow-md"
+                  className="w-9 h-9 rounded-full bg-black/75 hover:bg-black text-white backdrop-blur-md flex items-center justify-center transition-all border border-white/20 shadow-lg hover:scale-105"
                   aria-label="Tampilan Layar Penuh"
                 >
                   <Maximize2 className="w-4 h-4" />
@@ -327,15 +397,15 @@ export default function GaleriPage() {
 
         {/* THUMBNAIL STRIP 1 */}
         <div className="glass-card p-3 sm:p-4 rounded-2xl bg-white border-indigo-100 shadow-sm">
-          <div className="flex items-center gap-2.5 overflow-x-auto pb-1 pt-1 no-scrollbar scroll-smooth">
+          <div ref={protoThumbRef} className="flex items-center gap-2.5 overflow-x-auto pb-1 pt-1 no-scrollbar scroll-smooth">
             {prototipeImages.map((src, index) => (
               <button
                 key={src}
                 onClick={() => setProtoIndex(index)}
-                className={`relative aspect-video w-20 sm:w-28 shrink-0 rounded-xl overflow-hidden border-2 transition-all ${
+                className={`relative aspect-video w-20 sm:w-28 shrink-0 rounded-xl overflow-hidden border-2 transition-all duration-300 ${
                   protoIndex === index
                     ? 'border-indigo-500 ring-2 ring-indigo-300 scale-105 shadow-md opacity-100'
-                    : 'border-transparent opacity-50 hover:opacity-100'
+                    : 'border-transparent opacity-50 hover:opacity-90 hover:scale-102'
                 }`}
               >
                 <Image
@@ -367,23 +437,36 @@ export default function GaleriPage() {
           </p>
         </div>
 
-        {/* MAIN CAROUSEL 2 CONTAINER */}
-        <div className="relative glass-card rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl">
-          <div className="relative aspect-video w-full overflow-hidden flex items-center justify-center bg-slate-950">
-            <Image
-              key={galleryImages[galleryIndex]}
-              src={galleryImages[galleryIndex]}
-              alt={`Foto Galeri ${galleryIndex + 1}`}
-              fill
-              priority
-              sizes="(max-width: 1400px) 100vw, 1400px"
-              className="object-cover transition-opacity duration-300 animate-fadeIn"
-            />
+        {/* MAIN CAROUSEL 2 CONTAINER (ULTRA SMOOTH CONTINUOUS SLIDING TRACK) */}
+        <div 
+          className="relative glass-card rounded-3xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl select-none"
+          onTouchStart={handleTouchStartGallery}
+          onTouchEnd={handleTouchEndGallery}
+        >
+          <div className="relative aspect-video w-full overflow-hidden bg-slate-950">
+            {/* CONTINUOUS SMOOTH TRACK */}
+            <div 
+              className="flex w-full h-full transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] will-change-transform"
+              style={{ transform: `translateX(-${galleryIndex * 100}%)` }}
+            >
+              {galleryImages.map((src, index) => (
+                <div key={src} className="relative aspect-video w-full h-full shrink-0">
+                  <Image
+                    src={src}
+                    alt={`Foto Galeri ${index + 1}`}
+                    fill
+                    priority={index === 0 || Math.abs(galleryIndex - index) <= 1}
+                    sizes="(max-width: 1400px) 100vw, 1400px"
+                    className="object-cover"
+                  />
+                </div>
+              ))}
+            </div>
 
             {/* LEFT ARROW */}
             <button
               onClick={prevGallery}
-              className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-black/60 hover:bg-black/85 text-white backdrop-blur-md flex items-center justify-center transition-all border border-white/20 shadow-xl hover:scale-105"
+              className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-md flex items-center justify-center transition-all border border-white/20 shadow-xl hover:scale-110 active:scale-95 z-20"
               aria-label="Foto Sebelumnya"
             >
               <ChevronLeft className="w-7 h-7" />
@@ -392,29 +475,29 @@ export default function GaleriPage() {
             {/* RIGHT ARROW */}
             <button
               onClick={nextGallery}
-              className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-black/60 hover:bg-black/85 text-white backdrop-blur-md flex items-center justify-center transition-all border border-white/20 shadow-xl hover:scale-105"
+              className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-md flex items-center justify-center transition-all border border-white/20 shadow-xl hover:scale-110 active:scale-95 z-20"
               aria-label="Foto Selanjutnya"
             >
               <ChevronRight className="w-7 h-7" />
             </button>
 
             {/* TOP CONTROLS & COUNTER */}
-            <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none">
-              <span className="px-3.5 py-1.5 rounded-full bg-black/70 text-white text-xs font-black backdrop-blur-md border border-white/20 pointer-events-auto shadow-md">
+            <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none z-20">
+              <span className="px-3.5 py-1.5 rounded-full bg-black/75 text-white text-xs font-black backdrop-blur-md border border-white/20 pointer-events-auto shadow-lg">
                 {galleryIndex + 1} / {galleryImages.length}
               </span>
 
               <div className="flex items-center gap-2 pointer-events-auto">
                 <button
                   onClick={() => setGalleryIsPlaying(!galleryIsPlaying)}
-                  className="w-9 h-9 rounded-full bg-black/70 hover:bg-black text-white backdrop-blur-md flex items-center justify-center transition-all border border-white/20 shadow-md"
+                  className="w-9 h-9 rounded-full bg-black/75 hover:bg-black text-white backdrop-blur-md flex items-center justify-center transition-all border border-white/20 shadow-lg hover:scale-105"
                   aria-label={galleryIsPlaying ? 'Jeda Slideshow' : 'Putar Slideshow'}
                 >
                   {galleryIsPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
                 </button>
                 <button
                   onClick={openFullscreenGallery}
-                  className="w-9 h-9 rounded-full bg-black/70 hover:bg-black text-white backdrop-blur-md flex items-center justify-center transition-all border border-white/20 shadow-md"
+                  className="w-9 h-9 rounded-full bg-black/75 hover:bg-black text-white backdrop-blur-md flex items-center justify-center transition-all border border-white/20 shadow-lg hover:scale-105"
                   aria-label="Tampilan Layar Penuh"
                 >
                   <Maximize2 className="w-4 h-4" />
@@ -426,15 +509,15 @@ export default function GaleriPage() {
 
         {/* THUMBNAIL STRIP 2 */}
         <div className="glass-card p-3 sm:p-4 rounded-2xl bg-white border-sky-100 shadow-sm">
-          <div className="flex items-center gap-2.5 overflow-x-auto pb-1 pt-1 no-scrollbar scroll-smooth">
+          <div ref={galleryThumbRef} className="flex items-center gap-2.5 overflow-x-auto pb-1 pt-1 no-scrollbar scroll-smooth">
             {galleryImages.map((src, index) => (
               <button
                 key={src}
                 onClick={() => setGalleryIndex(index)}
-                className={`relative aspect-video w-20 sm:w-28 shrink-0 rounded-xl overflow-hidden border-2 transition-all ${
+                className={`relative aspect-video w-20 sm:w-28 shrink-0 rounded-xl overflow-hidden border-2 transition-all duration-300 ${
                   galleryIndex === index
                     ? 'border-sky-500 ring-2 ring-sky-300 scale-105 shadow-md opacity-100'
-                    : 'border-transparent opacity-50 hover:opacity-100'
+                    : 'border-transparent opacity-50 hover:opacity-90 hover:scale-102'
                 }`}
               >
                 <Image
@@ -478,17 +561,25 @@ export default function GaleriPage() {
             <ChevronRight className="w-9 h-9" />
           </button>
 
-          <div className="relative w-full h-full p-2 sm:p-8 flex items-center justify-center">
-            <Image
-              src={prototipeImages[protoIndex]}
-              alt={`Slide Fullscreen ${protoIndex + 1}`}
-              fill
-              className="object-contain"
-              priority
-            />
+          {/* SMOOTH FULLSCREEN TRACK */}
+          <div 
+            className="flex w-full h-full transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] will-change-transform"
+            style={{ transform: `translateX(-${protoIndex * 100}%)` }}
+          >
+            {prototipeImages.map((src, index) => (
+              <div key={src} className="relative w-full h-full shrink-0 flex items-center justify-center p-2 sm:p-8">
+                <Image
+                  src={src}
+                  alt={`Slide Fullscreen ${index + 1}`}
+                  fill
+                  className="object-contain"
+                  priority={Math.abs(protoIndex - index) <= 1}
+                />
+              </div>
+            ))}
           </div>
 
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-5 py-2 rounded-full bg-black/70 text-white text-xs sm:text-sm font-bold border border-white/20 backdrop-blur-md shadow-2xl z-[1000000]">
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-5 py-2 rounded-full bg-black/75 text-white text-xs sm:text-sm font-bold border border-white/20 backdrop-blur-md shadow-2xl z-[1000000]">
             {protoIndex + 1} / {prototipeImages.length}
           </div>
         </div>,
@@ -522,17 +613,25 @@ export default function GaleriPage() {
             <ChevronRight className="w-9 h-9" />
           </button>
 
-          <div className="relative w-full h-full p-2 sm:p-8 flex items-center justify-center">
-            <Image
-              src={galleryImages[galleryIndex]}
-              alt={`Foto Fullscreen ${galleryIndex + 1}`}
-              fill
-              className="object-contain"
-              priority
-            />
+          {/* SMOOTH FULLSCREEN TRACK */}
+          <div 
+            className="flex w-full h-full transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] will-change-transform"
+            style={{ transform: `translateX(-${galleryIndex * 100}%)` }}
+          >
+            {galleryImages.map((src, index) => (
+              <div key={src} className="relative w-full h-full shrink-0 flex items-center justify-center p-2 sm:p-8">
+                <Image
+                  src={src}
+                  alt={`Foto Fullscreen ${index + 1}`}
+                  fill
+                  className="object-contain"
+                  priority={Math.abs(galleryIndex - index) <= 1}
+                />
+              </div>
+            ))}
           </div>
 
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-5 py-2 rounded-full bg-black/70 text-white text-xs sm:text-sm font-bold border border-white/20 backdrop-blur-md shadow-2xl z-[1000000]">
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-5 py-2 rounded-full bg-black/75 text-white text-xs sm:text-sm font-bold border border-white/20 backdrop-blur-md shadow-2xl z-[1000000]">
             {galleryIndex + 1} / {galleryImages.length}
           </div>
         </div>,
